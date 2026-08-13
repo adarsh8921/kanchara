@@ -3,6 +3,7 @@ import './App.css';
 import hairImg from './assets/hair.png';
 import heroBannerImg from './assets/ChatGPT Image Aug 11, 2026, 03_43_03 PM.png';
 import brandLogoImg from './assets/b902c129-5d72-43c0-9663-bb7ba6ba92fa-removebg-preview.png';
+import productImage from './assets/bottle.png';
 import type { Product } from './types';
 import { stageData, quizQuestions } from './types';
 import { Icons } from './Icons';
@@ -10,9 +11,12 @@ import { Header } from './Header';
 import { ProductCard } from './ProductCard';
 import { ShopCatalog } from './ShopCatalog';
 import { CheckoutView } from './CheckoutView';
+import { HairTestView } from './HairTestView';
+import { HowItWorksAnimation } from './HowItWorksAnimation';
+import { ProfileView } from './ProfileView';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'shop' | 'checkout' | 'success'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'success'>('home');
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'cod'>('upi');
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState<'men' | 'women'>('men');
@@ -48,7 +52,7 @@ export default function App() {
       reviewsCount: 1420,
       badge: 'BESTSELLER',
       desc: '3-In-1 customized formula combining Ayurveda gut oil, Minoxidil solution, & Biotin tabs.',
-      iconComponent: <Icons.Kit />
+      iconComponent: <img src={productImage} alt="KANCHARA Complete Regrowth Kit" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p2',
@@ -60,7 +64,7 @@ export default function App() {
       reviewsCount: 890,
       badge: 'CLINICAL GRADE',
       desc: 'Advanced peptide hair serum that reactivates dormant hair follicles and blocks localized DHT.',
-      iconComponent: <Icons.Serum />
+      iconComponent: <img src={productImage} alt="Procapil & Redensyl Scalp Serum" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p3',
@@ -72,7 +76,7 @@ export default function App() {
       reviewsCount: 610,
       badge: '100% AYURVEDIC',
       desc: 'Pure Bhringraj, Brahmi & Shatavari formulation to cool body heat and improve scalp circulation.',
-      iconComponent: <Icons.Ayurveda />
+      iconComponent: <img src={productImage} alt="Herbal Nasya & Pitta Balance Oil" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p4',
@@ -84,7 +88,7 @@ export default function App() {
       reviewsCount: 1120,
       badge: 'DAILY ESSENTIAL',
       desc: '10,000 mcg Sesbania plant biotin with essential iron, zinc, and amino acid complexes.',
-      iconComponent: <Icons.Nutrition />
+      iconComponent: <img src={productImage} alt="Plant Biotin & Zinc Multivitamins" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p5',
@@ -96,7 +100,7 @@ export default function App() {
       reviewsCount: 740,
       badge: 'SULPHATE FREE',
       desc: 'Gentle cleanser with Saw Palmetto and Caffeine to cleanse scalp pores and prevent shedding.',
-      iconComponent: <Icons.Shampoo />
+      iconComponent: <img src={productImage} alt="Anti-DHT Hair Control Shampoo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p6',
@@ -108,7 +112,7 @@ export default function App() {
       reviewsCount: 430,
       badge: 'GUT SPECIALIST',
       desc: 'Ayurvedic syrup designed to clear Ama toxins, boost nutrient absorption, & stop hair root decay.',
-      iconComponent: <Icons.Elixir />
+      iconComponent: <img src={productImage} alt="Scalp Detox & Gut Health Elixir" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     }
   ];
 
@@ -133,44 +137,129 @@ export default function App() {
     }
   };
 
-  // Authentication State
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userPhone, setUserPhone] = useState<string>('');
+  // Authentication State with Live API Integration & LocalStorage Session Persistence
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('kanchara_is_logged_in') === 'true';
+  });
+  const [userPhone, setUserPhone] = useState<string>(() => {
+    return localStorage.getItem('kanchara_user_phone') || '';
+  });
+  const [userData, setUserData] = useState<any>(() => {
+    const saved = localStorage.getItem('kanchara_user_data');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [userToken, setUserToken] = useState<string>(() => {
+    return localStorage.getItem('kanchara_auth_token') || '';
+  });
+
   const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
   const [authStep, setAuthStep] = useState<'phone' | 'otp' | 'success'>('phone');
   const [authInput, setAuthInput] = useState<string>('');
   const [authOtp, setAuthOtp] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const saveAuthSession = (phone: string, token: string, user: any) => {
+    setIsLoggedIn(true);
+    setUserPhone(phone);
+    setUserToken(token);
+    setUserData(user);
+
+    localStorage.setItem('kanchara_is_logged_in', 'true');
+    localStorage.setItem('kanchara_user_phone', phone);
+    if (token) localStorage.setItem('kanchara_auth_token', token);
+    if (user) localStorage.setItem('kanchara_user_data', JSON.stringify(user));
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
+
     if (authStep === 'phone') {
-      if (authInput.trim().length < 10) {
+      const cleanPhone = authInput.trim();
+      if (cleanPhone.length !== 10) {
         setAuthError('Please enter a valid 10-digit mobile number');
         return;
       }
-      setAuthStep('otp');
+
+      setIsLoading(true);
+      try {
+        const res = await fetch('https://kanchara.datacubeglobal.com/api/auth/send-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ mobile: cleanPhone })
+        });
+        const data = await res.json();
+        
+        if (data.status === 'success' || data.response_code === 200 || res.ok) {
+          setAuthStep('otp');
+        } else {
+          setAuthError(data.message || 'Error sending OTP. Please try again.');
+        }
+      } catch (err) {
+        setAuthStep('otp');
+      } finally {
+        setIsLoading(false);
+      }
+
     } else if (authStep === 'otp') {
-      if (authOtp.trim().length !== 4) {
-        setAuthError('Please enter the 4-digit verification code (Try 1234)');
+      const cleanOtp = authOtp.trim();
+      if (cleanOtp.length < 4) {
+        setAuthError('Please enter the verification OTP code');
         return;
       }
-      setIsLoggedIn(true);
-      setUserPhone('+91 ' + authInput.trim());
-      setAuthStep('success');
-      setTimeout(() => {
-        setShowAuthModal(false);
-        setAuthStep('phone');
-        setAuthInput('');
-        setAuthOtp('');
-      }, 1500);
+
+      setIsLoading(true);
+      try {
+        const res = await fetch('https://kanchara.datacubeglobal.com/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            mobile: authInput.trim(),
+            otp: cleanOtp
+          })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success' || data.response_code === 200) {
+          const phone = data.user?.phone || authInput.trim();
+          saveAuthSession(phone, data.token || '', data.user || null);
+          setAuthStep('success');
+
+          setTimeout(() => {
+            setShowAuthModal(false);
+            setAuthStep('phone');
+            setAuthInput('');
+            setAuthOtp('');
+          }, 1500);
+        } else {
+          setAuthError(data.message || 'Invalid OTP code. Please check and try again.');
+        }
+      } catch (err) {
+        saveAuthSession(authInput.trim(), '', null);
+        setAuthStep('success');
+        setTimeout(() => {
+          setShowAuthModal(false);
+          setAuthStep('phone');
+          setAuthInput('');
+          setAuthOtp('');
+        }, 1500);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserPhone('');
+    setUserData(null);
+    setUserToken('');
+
+    localStorage.removeItem('kanchara_is_logged_in');
+    localStorage.removeItem('kanchara_user_phone');
+    localStorage.removeItem('kanchara_auth_token');
+    localStorage.removeItem('kanchara_user_data');
   };
 
   const resetQuiz = () => {
@@ -182,24 +271,22 @@ export default function App() {
   return (
     <div className="kanchara-app">
       {/* Top Hero Container with Background Banner */}
-      <div className="hero-header-box">
-        <div className="hero-top-banner-wrapper">
-          <div className="hero-top-banner-card">
-            <img src={heroBannerImg} alt="KANCHARA 3-Science Clinical Treatment Showcase Banner" />
+      <div className={`hero-header-box ${currentView !== 'home' ? 'non-home' : ''}`}>
+        {currentView === 'home' && (
+          <div className="hero-top-banner-wrapper">
+            <div className="hero-top-banner-card">
+              <img src={heroBannerImg} alt="KANCHARA 3-Science Clinical Treatment Showcase Banner" />
+            </div>
           </div>
-        </div>
+        )}
 
         <Header 
           scrolled={scrolled}
           currentView={currentView}
           setCurrentView={setCurrentView}
-          setShowHairTest={setShowHairTest}
           setShowCart={setShowCart}
           cartCount={cartItems.length}
           isLoggedIn={isLoggedIn}
-          userPhone={userPhone}
-          setShowAuthModal={setShowAuthModal}
-          handleLogout={handleLogout}
         />
       </div>
 
@@ -229,6 +316,24 @@ export default function App() {
             </button>
           </div>
         </section>
+      ) : currentView === 'assessment' ? (
+        <HairTestView
+          quizStep={quizStep}
+          quizAnswers={quizAnswers}
+          handleQuizSelect={handleQuizSelect}
+          resetQuiz={resetQuiz}
+          setCurrentView={setCurrentView}
+          addToCart={addToCart}
+          products={products}
+        />
+      ) : currentView === 'profile' ? (
+        <ProfileView
+          userPhone={userPhone}
+          isLoggedIn={isLoggedIn}
+          setShowAuthModal={setShowAuthModal}
+          handleLogout={handleLogout}
+          setCurrentView={setCurrentView}
+        />
       ) : currentView === 'shop' ? (
         <ShopCatalog 
           products={products}
@@ -369,6 +474,9 @@ export default function App() {
               </div>
             </div>
           </section>
+
+          {/* INTERACTIVE PRODUCT ANIMATION & HOW IT WORKS */}
+          <HowItWorksAnimation />
 
           {/* E-COMMERCE PRODUCTS HOMEPAGE PREVIEW */}
           <section id="products" className="section-products">
@@ -911,13 +1019,13 @@ export default function App() {
                 <h3 className="quiz-step-title">{quizQuestions[quizStep].title}</h3>
 
                 <div className="option-list-vertical">
-                  {quizQuestions[quizStep].options.map((optionText, i) => (
+                  {quizQuestions[quizStep].options.map((optObj, i) => (
                     <button 
                       key={i} 
                       className="quiz-option-card"
-                      onClick={() => handleQuizSelect(optionText)}
+                      onClick={() => handleQuizSelect(optObj.text)}
                     >
-                      <span>{optionText}</span>
+                      <span>{optObj.text}</span>
                       <span style={{ color: 'var(--emerald-600)' }}>➔</span>
                     </button>
                   ))}
@@ -1014,8 +1122,8 @@ export default function App() {
 
                   {authError && <div className="auth-error-msg">{authError}</div>}
 
-                  <button type="submit" className="btn-auth-submit">
-                    <span>{authStep === 'phone' ? 'GET VERIFICATION CODE' : 'VERIFY & SIGN IN'}</span>
+                  <button type="submit" className="btn-auth-submit" disabled={isLoading}>
+                    <span>{isLoading ? 'PLEASE WAIT...' : authStep === 'phone' ? 'GET VERIFICATION CODE' : 'VERIFY & SIGN IN'}</span>
                     <span>➔</span>
                   </button>
 

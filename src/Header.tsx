@@ -4,32 +4,24 @@ import brandLogoImg from './assets/b902c129-5d72-43c0-9663-bb7ba6ba92fa-removebg
 
 interface HeaderProps {
   scrolled: boolean;
-  currentView: 'home' | 'shop' | 'checkout' | 'success';
-  setCurrentView: (view: 'home' | 'shop' | 'checkout' | 'success') => void;
-  setShowHairTest: (show: boolean) => void;
+  currentView: 'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'success';
+  setCurrentView: (view: 'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'success') => void;
   setShowCart: (show: boolean) => void;
   cartCount: number;
   isLoggedIn: boolean;
-  userPhone: string;
-  setShowAuthModal: (show: boolean) => void;
-  handleLogout: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   scrolled,
   currentView,
   setCurrentView,
-  setShowHairTest,
   setShowCart,
   cartCount,
-  isLoggedIn,
-  userPhone,
-  setShowAuthModal,
-  handleLogout
+  isLoggedIn
 }) => {
   return (
     <>
-      <header className={`navbar ${scrolled ? 'glass-panel' : ''}`}>
+      <header className={`navbar ${scrolled ? 'sticky glass-panel' : ''}`}>
         <div className="nav-container">
           <a href="#" className="brand-logo" onClick={(e) => { e.preventDefault(); setCurrentView('home'); }}>
             <img src={brandLogoImg} alt="KANCHARA Logo" className="brand-logo-img" style={{ height: '64px', width: 'auto' }} />
@@ -44,30 +36,29 @@ export const Header: React.FC<HeaderProps> = ({
           </nav>
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <button className="btn-nav-accent" onClick={() => setShowHairTest(true)}>
+            <button className="btn-nav-accent" onClick={() => setCurrentView('assessment')}>
               Take Free Hair Test
             </button>
 
-            {isLoggedIn ? (
-              <div className="user-profile-pill">
-                <span className="user-phone-tag"><Icons.User /> {userPhone || '+91 98765 43210'}</span>
-                <button className="btn-logout-nav" title="Logout" onClick={handleLogout}>
-                  <Icons.Logout />
-                </button>
-              </div>
-            ) : (
-              <button className="btn-login-nav" onClick={() => setShowAuthModal(true)}>
-                <Icons.User /> Login
-              </button>
-            )}
-
             <button 
               className="btn-cart-nav icon-only" 
+              title={isLoggedIn ? "User Profile" : "Login / Profile"}
+              onClick={() => setCurrentView('profile')}
+            >
+              <Icons.User />
+            </button>
+
+            <button 
+              className={`btn-cart-nav icon-only ${cartCount > 0 ? 'has-items' : ''}`} 
               title="Shopping Cart"
               onClick={() => setShowCart(true)}
             >
               <Icons.Cart />
-              {cartCount > 0 && <span className="cart-badge-count">{cartCount}</span>}
+              {cartCount > 0 && (
+                <span className="cart-badge-count">
+                  {cartCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
