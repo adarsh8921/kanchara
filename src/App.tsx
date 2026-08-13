@@ -329,6 +329,8 @@ export default function App() {
       ) : currentView === 'profile' ? (
         <ProfileView
           userPhone={userPhone}
+          userData={userData}
+          userToken={userToken}
           isLoggedIn={isLoggedIn}
           setShowAuthModal={setShowAuthModal}
           handleLogout={handleLogout}

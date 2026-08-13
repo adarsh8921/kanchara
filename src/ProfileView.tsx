@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 interface ProfileViewProps {
   userPhone: string;
+  userData: any;
+  userToken: string;
   isLoggedIn: boolean;
   setShowAuthModal: (show: boolean) => void;
   handleLogout: () => void;
@@ -10,13 +12,15 @@ interface ProfileViewProps {
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
   userPhone,
+  userData,
+  userToken,
   isLoggedIn,
   setShowAuthModal,
   handleLogout,
   setCurrentView
 }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'orders' | 'consultations' | 'prescriptions'>('profile');
-  const [userName, setUserName] = useState('Rahul Sharma');
+  const [userName, setUserName] = useState(userData?.first_name || 'Rahul Sharma');
   const [userEmail, setUserEmail] = useState('rahul.sharma@example.com');
   const [savedAddress, setSavedAddress] = useState('42, Green Avenue, Sector 15, Bengaluru, Karnataka - 560001');
   const [isSaved, setIsSaved] = useState(false);
@@ -86,6 +90,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <div style={{ fontSize: '12px', fontWeight: 800, color: '#FEF3C7', letterSpacing: '1px', textTransform: 'uppercase' }}>VERIFIED PATIENT ACCOUNT</div>
               <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '32px', fontWeight: 800, margin: '4px 0 0', color: '#ffffff' }}>{userName}</h1>
               <p style={{ margin: 0, color: '#E6F7F2', fontSize: '14px' }}>📱 {userPhone || '+91 98765 43210'} • ✉️ {userEmail}</p>
+              {userToken && (
+                <div style={{ fontSize: '11px', color: '#FBBF24', marginTop: '4px', fontWeight: 600 }}>
+                  🔑 Auth Token: {userToken.substring(0, 18)}...
+                </div>
+              )}
             </div>
           </div>
 
