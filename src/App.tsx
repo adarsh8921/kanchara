@@ -14,15 +14,57 @@ import { CheckoutView } from './CheckoutView';
 import { HairTestView } from './HairTestView';
 import { HowItWorksAnimation } from './HowItWorksAnimation';
 import { ProfileView } from './ProfileView';
+import { WishlistView } from './WishlistView';
+import { fetchProductsFromAPI, addToCartAPI, fetchCartAPI, removeFromCartAPI, updateCartCountAPI, trackCheckoutClickAPI, fetchWishlistAPI, toggleWishlistAPI } from './api';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'success'>('home');
+  const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('kanchara_wishlist_ids');
+    if (saved) {
+      try {
+        return new Set(JSON.parse(saved));
+      } catch (e) {}
+    }
+    return new Set();
+  });
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'cod'>('upi');
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState<'men' | 'women'>('men');
   const [stage, setStage] = useState<number>(2);
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [showHairTest, setShowHairTest] = useState<boolean>(false);
+
+  const [currentView, setCurrentViewRaw] = useState<'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'wishlist' | 'success'>(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (['home', 'shop', 'checkout', 'assessment', 'profile', 'wishlist', 'success'].includes(hash)) {
+      return hash as any;
+    }
+    const saved = localStorage.getItem('kanchara_current_view');
+    if (saved && ['home', 'shop', 'checkout', 'assessment', 'profile', 'wishlist', 'success'].includes(saved)) {
+      return saved as any;
+    }
+    return 'home';
+  });
+
+  const setCurrentView = (view: 'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'wishlist' | 'success') => {
+    setCurrentViewRaw(view);
+    localStorage.setItem('kanchara_current_view', view);
+    try {
+      window.history.replaceState(null, '', `#${view}`);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['home', 'shop', 'checkout', 'assessment', 'profile', 'wishlist', 'success'].includes(hash)) {
+        setCurrentViewRaw(hash as any);
+        localStorage.setItem('kanchara_current_view', hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
   
   // E-Commerce State
   const [productCategory, setProductCategory] = useState<string>('all');
@@ -38,45 +80,65 @@ export default function App() {
       setScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
-  const products: Product[] = [
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('in-view');
+          } else {
+            entry.target.classList.remove('in-view');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const sections = document.querySelectorAll('section, .how-it-works-animation-section');
+    sections.forEach((s) => observer.observe(s));
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      sections.forEach((s) => observer.unobserve(s));
+    };
+  }, [currentView]);
+
+  const initialProducts: Product[] = [
     {
       id: 'p1',
       name: 'KANCHARA Complete Regrowth Kit',
       category: 'kits',
       price: 1899,
-      originalPrice: 2499,
+      originalPrice: 2899,
       rating: 4.9,
-      reviewsCount: 1420,
+      reviewsCount: 3840,
       badge: 'BESTSELLER',
-      desc: '3-In-1 customized formula combining Ayurveda gut oil, Minoxidil solution, & Biotin tabs.',
+      desc: '3-In-1 Synergistic System: Ayurveda Pitta Oil + 5% Redensyl & Procapil Serum + Plant Biotin Tablets.',
       iconComponent: <img src={productImage} alt="KANCHARA Complete Regrowth Kit" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p2',
-      name: 'Procapil & Redensyl Scalp Serum',
+      name: 'Advanced Scalp Peptide Serum',
       category: 'serums',
       price: 899,
-      originalPrice: 1199,
-      rating: 4.8,
-      reviewsCount: 890,
+      originalPrice: 1299,
+      rating: 4.9,
+      reviewsCount: 1420,
       badge: 'CLINICAL GRADE',
-      desc: 'Advanced peptide hair serum that reactivates dormant hair follicles and blocks localized DHT.',
-      iconComponent: <img src={productImage} alt="Procapil & Redensyl Scalp Serum" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+      desc: '5% Capixyl + Anagain formula designed to extend hair growth phase and block scalp DHT.',
+      iconComponent: <img src={productImage} alt="Advanced Scalp Peptide Serum" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p3',
-      name: 'Herbal Nasya & Pitta Balance Oil',
+      name: 'Ayurvedic Pitta Detox Hair Oil',
       category: 'ayurveda',
       price: 549,
-      originalPrice: 749,
-      rating: 4.9,
-      reviewsCount: 610,
-      badge: '100% AYURVEDIC',
-      desc: 'Pure Bhringraj, Brahmi & Shatavari formulation to cool body heat and improve scalp circulation.',
-      iconComponent: <img src={productImage} alt="Herbal Nasya & Pitta Balance Oil" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+      originalPrice: 799,
+      rating: 4.8,
+      reviewsCount: 980,
+      badge: '100% HERBAL',
+      desc: 'Kshirapak vidhi infused oil with Bhringraj, Amla & Rosemary to cool scalp heat and stop hair fall.',
+      iconComponent: <img src={productImage} alt="Ayurvedic Pitta Detox Hair Oil" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
     },
     {
       id: 'p4',
@@ -116,13 +178,99 @@ export default function App() {
     }
   ];
 
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+
+  useEffect(() => {
+    fetchProductsFromAPI().then(apiData => {
+      const list = Array.isArray(apiData) ? apiData : (apiData?.products || apiData?.data || []);
+      if (list.length > 0) {
+        const mapped: Product[] = list.map((item: any, idx: number) => {
+          const imgUrl = item.primary_image ? `${item.image_path || 'https://kanchara.datacubeglobal.com/storage'}/${item.primary_image}` : productImage;
+          return {
+            id: String(item.product_id || item.id || `api-${idx}`),
+            product_id: item.product_id || item.id,
+            name: item.product_name || item.name || item.title || `Formulation #${idx + 1}`,
+            desc: item.description || item.desc || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
+            price: Number(item.special_price || item.price || item.unit_price || 999),
+            originalPrice: Number(item.mrp || item.original_price || (Number(item.special_price || item.price || 999) + 400)),
+            rating: Number(item.rating || 4.9),
+            reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
+            badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
+            category: item.category || item.category_name || (idx % 4 === 0 ? 'kits' : idx % 4 === 1 ? 'serums' : idx % 4 === 2 ? 'ayurveda' : 'nutrition'),
+            benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
+            formula: item.formula || 'Ayurveda + Procapil + Nutrients',
+            iconComponent: (
+              <img 
+                src={imgUrl} 
+                alt={item.product_name || item.name} 
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = productImage;
+                }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+              />
+            )
+          };
+        });
+        const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
+        setProducts(unique);
+      }
+    }).catch(err => {
+      console.warn('Failed to load products from API on mount:', err);
+    });
+  }, []);
+
+  const resolveRealProductId = (item: any): string | number => {
+    if (item.product_id && String(item.product_id).startsWith('eyJ')) {
+      return item.product_id;
+    }
+    const itemName = (item.product_name || item.name || item.title || '').trim().toLowerCase();
+    const matched = products.find(p => 
+      (p.name && p.name.trim().toLowerCase() === itemName) ||
+      (p.product_id && String(p.product_id) === String(item.product_id)) ||
+      (p.id && String(p.id) === String(item.id))
+    );
+    if (matched?.product_id) return matched.product_id;
+    if (matched?.id) return matched.id;
+    return item.product_id || item.id;
+  };
+
   const addToCart = (product: Product) => {
-    setCartItems(prev => [...prev, product]);
+    const targetProductId = resolveRealProductId(product);
+    setCartItems(prev => [...prev, { ...product, product_id: targetProductId }]);
     setShowCart(true);
+
+    const token = userToken || localStorage.getItem('kanchara_auth_token') || undefined;
+    addToCartAPI(targetProductId, 1, undefined, token).catch(err => {
+      console.warn('POST /api/cart error:', err);
+    });
   };
 
   const removeFromCart = (index: number) => {
+    const itemToRemove = cartItems[index];
     setCartItems(prev => prev.filter((_, i) => i !== index));
+
+    if (itemToRemove) {
+      const targetProductId = resolveRealProductId(itemToRemove);
+      const token = userToken || localStorage.getItem('kanchara_auth_token') || undefined;
+      removeFromCartAPI(targetProductId, token).catch(err => {
+        console.warn('POST /api/cart/remove-item error:', err);
+      });
+    }
+  };
+
+  const updateCartQuantity = (product: Product, newCount: number) => {
+    const idx = cartItems.findIndex(i => i.name === product.name || (i.product_id || i.id) === (product.product_id || product.id));
+    if (newCount <= 0) {
+      if (idx !== -1) removeFromCart(idx);
+      return;
+    }
+
+    const targetProductId = resolveRealProductId(product);
+    const token = userToken || localStorage.getItem('kanchara_auth_token') || undefined;
+    updateCartCountAPI(targetProductId, newCount, token).catch(err => {
+      console.warn('POST /api/cart/update-count error:', err);
+    });
   };
 
   const cartTotal = cartItems.reduce((sum, item) => sum + item.price, 0);
@@ -158,6 +306,84 @@ export default function App() {
   const [authOtp, setAuthOtp] = useState<string>('');
   const [authError, setAuthError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRegistered, setIsRegistered] = useState<boolean>(true);
+
+  useEffect(() => {
+    const token = userToken || localStorage.getItem('kanchara_auth_token');
+    if (token) {
+      fetchCartAPI(token).then(serverCart => {
+        const rawItems = Array.isArray(serverCart) ? serverCart : (serverCart?.cart || serverCart?.items || serverCart?.data || []);
+        if (Array.isArray(rawItems) && rawItems.length > 0) {
+          const mappedCartItems: Product[] = rawItems.map((item: any, idx: number) => {
+            const realProductId = resolveRealProductId(item);
+            return {
+              id: String(realProductId || item.product_id || item.id || `cart-${idx}`),
+              product_id: realProductId,
+              name: item.name || item.product_name || item.title || `Prescribed Kit #${idx + 1}`,
+              category: item.category || 'kits',
+              price: Number(item.price || item.unit_price || 999),
+              originalPrice: Number(item.original_price || item.mrp || (Number(item.price || 999) + 400)),
+              rating: Number(item.rating || 4.9),
+              reviewsCount: Number(item.reviews_count || 140),
+              badge: item.badge || 'PRESCRIPTION APPROVED',
+              desc: item.desc || item.description || 'Doctor Prescribed Hair Regrowth Solution',
+              iconComponent: <img src={productImage} alt={item.name || 'KANCHARA Formulation'} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            };
+          });
+          setCartItems(mappedCartItems);
+        }
+      }).catch(err => {
+        console.warn('GET /api/cart fetch error:', err);
+      });
+
+      fetchWishlistAPI(token).then(data => {
+        const raw = Array.isArray(data) ? data : (data?.wishlist || data?.data || []);
+        if (Array.isArray(raw)) {
+          const ids = new Set<string>();
+          raw.forEach((i: any) => {
+            const key = String(i.product_id ?? i.id ?? i.name ?? i.product_name);
+            if (key) ids.add(key);
+          });
+          setWishlistIds(ids);
+          localStorage.setItem('kanchara_wishlist_ids', JSON.stringify(Array.from(ids)));
+        }
+      }).catch(err => {
+        console.warn('GET /api/wishlist fetch error:', err);
+      });
+    }
+  }, [userToken]);
+
+  const handleToggleWishlist = (product: Product) => {
+    const key = String(product.product_id ?? product.id ?? product.name);
+
+    setWishlistIds(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      localStorage.setItem('kanchara_wishlist_ids', JSON.stringify(Array.from(next)));
+      return next;
+    });
+
+    const token = userToken || localStorage.getItem('kanchara_auth_token') || undefined;
+    if (token) {
+      toggleWishlistAPI(product.product_id || product.id, token).catch(err => {
+        console.warn('POST /api/wishlist error:', err);
+      });
+    }
+  };
+
+  const handleSyncWishlist = (wishProducts: Product[]) => {
+    const ids = new Set<string>();
+    wishProducts.forEach(p => {
+      const key = String(p.product_id ?? p.id ?? p.name);
+      if (key) ids.add(key);
+    });
+    setWishlistIds(ids);
+    localStorage.setItem('kanchara_wishlist_ids', JSON.stringify(Array.from(ids)));
+  };
 
   const saveAuthSession = (phone: string, token: string, user: any) => {
     setIsLoggedIn(true);
@@ -192,11 +418,17 @@ export default function App() {
         const data = await res.json();
         
         if (data.status === 'success' || data.response_code === 200 || res.ok) {
+          if (typeof data.is_registered !== 'undefined') {
+            setIsRegistered(Boolean(data.is_registered));
+          } else {
+            setIsRegistered(true);
+          }
           setAuthStep('otp');
         } else {
           setAuthError(data.message || 'Error sending OTP. Please try again.');
         }
       } catch (err) {
+        setIsRegistered(true);
         setAuthStep('otp');
       } finally {
         setIsLoading(false);
@@ -211,7 +443,11 @@ export default function App() {
 
       setIsLoading(true);
       try {
-        const res = await fetch('https://kanchara.datacubeglobal.com/api/auth/verify-otp', {
+        const targetUrl = isRegistered 
+          ? 'https://kanchara.datacubeglobal.com/api/auth/login-with-otp' 
+          : 'https://kanchara.datacubeglobal.com/api/auth/verify-otp';
+
+        let res = await fetch(targetUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
           body: JSON.stringify({
@@ -219,11 +455,32 @@ export default function App() {
             otp: cleanOtp
           })
         });
-        const data = await res.json();
+        let data = await res.json();
 
-        if (data.status === 'success' || data.response_code === 200) {
-          const phone = data.user?.phone || authInput.trim();
-          saveAuthSession(phone, data.token || '', data.user || null);
+        // Fallback check if response not successful
+        if (data.status !== 'success' && data.response_code !== 200) {
+          const fallbackUrl = isRegistered
+            ? 'https://kanchara.datacubeglobal.com/api/auth/verify-otp'
+            : 'https://kanchara.datacubeglobal.com/api/auth/login-with-otp';
+          try {
+            const fallbackRes = await fetch(fallbackUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ mobile: authInput.trim(), otp: cleanOtp })
+            });
+            const fallbackData = await fallbackRes.json();
+            if (fallbackData.status === 'success' || fallbackData.response_code === 200) {
+              data = fallbackData;
+              res = fallbackRes;
+            }
+          } catch (e) {
+            // Keep original response
+          }
+        }
+
+        if (data.status === 'success' || data.response_code === 200 || res.ok) {
+          const phone = data.user?.phone || data.user?.mobile || data.data?.mobile || authInput.trim();
+          saveAuthSession(phone, data.token || data.access_token || data.data?.token || '', data.user || data.data || null);
           setAuthStep('success');
 
           setTimeout(() => {
@@ -286,6 +543,7 @@ export default function App() {
           setCurrentView={setCurrentView}
           setShowCart={setShowCart}
           cartCount={cartItems.length}
+          wishlistCount={wishlistIds.size}
           isLoggedIn={isLoggedIn}
         />
       </div>
@@ -335,7 +593,14 @@ export default function App() {
           setShowAuthModal={setShowAuthModal}
           handleLogout={handleLogout}
           setCurrentView={setCurrentView}
+          onUpdateUserData={(updatedUser) => {
+            setUserData(updatedUser);
+            if (updatedUser.phone) setUserPhone(updatedUser.phone);
+            localStorage.setItem('kanchara_user_data', JSON.stringify(updatedUser));
+          }}
         />
+      ) : currentView === 'wishlist' ? (
+        <WishlistView onAddToCart={addToCart} setCurrentView={setCurrentView} onRemoveFromWishlist={handleToggleWishlist} onSyncWishlist={handleSyncWishlist} />
       ) : currentView === 'shop' ? (
         <ShopCatalog 
           products={products}
@@ -343,11 +608,13 @@ export default function App() {
           setProductCategory={setProductCategory}
           addToCart={addToCart}
           setCurrentView={setCurrentView}
+          wishlistIds={wishlistIds}
+          onToggleWishlist={handleToggleWishlist}
         />
       ) : (
         <>
           {/* Hero Section (Live Interactive Code UI matching IMG_0691.PNG Design) */}
-          <section className="hero-wrapper-botanical">
+          <section id="banner" className="hero-wrapper-botanical">
             <div className="hero-grid">
               <div className="hero-left-content">
                 <div className="hero-pill-badge-botanical">
@@ -558,8 +825,26 @@ export default function App() {
                 <h2 className="section-heading" style={{ margin: 0 }}>Hair health starts from within</h2>
               </div>
               <div className="carousel-nav-btns">
-                <button className="nav-arrow-btn" title="Previous">‹</button>
-                <button className="nav-arrow-btn" title="Next">›</button>
+                <button 
+                  className="nav-arrow-btn" 
+                  title="Previous"
+                  onClick={() => {
+                    const row = document.querySelector('.root-causes-cards-row');
+                    if (row) row.scrollBy({ left: -320, behavior: 'smooth' });
+                  }}
+                >
+                  ‹
+                </button>
+                <button 
+                  className="nav-arrow-btn" 
+                  title="Next"
+                  onClick={() => {
+                    const row = document.querySelector('.root-causes-cards-row');
+                    if (row) row.scrollBy({ left: 320, behavior: 'smooth' });
+                  }}
+                >
+                  ›
+                </button>
               </div>
             </div>
 
@@ -804,19 +1089,19 @@ export default function App() {
                 </p>
 
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '28px' }}>
-                  <div style={{ background: '#ffffff', border: '1px solid var(--slate-200)', padding: '14px 20px', borderRadius: 'var(--radius-md)', flex: 1, boxShadow: 'var(--shadow-sm)' }}>
-                    <strong style={{ display: 'block', fontSize: '24px', color: 'var(--emerald-700)' }}>+48%</strong>
-                    <span style={{ fontSize: '13px', color: 'var(--slate-600)', fontWeight: 600 }}>Increased Hair Density</span>
+                  <div className="banner-stat-box">
+                    <strong>+48%</strong>
+                    <span>Increased Hair Density</span>
                   </div>
-                  <div style={{ background: '#ffffff', border: '1px solid var(--slate-200)', padding: '14px 20px', borderRadius: 'var(--radius-md)', flex: 1, boxShadow: 'var(--shadow-sm)' }}>
-                    <strong style={{ display: 'block', fontSize: '24px', color: 'var(--emerald-700)' }}>93%</strong>
-                    <span style={{ fontSize: '13px', color: 'var(--slate-600)', fontWeight: 600 }}>Shedding Stopped</span>
+                  <div className="banner-stat-box">
+                    <strong>93%</strong>
+                    <span>Shedding Stopped</span>
                   </div>
                 </div>
 
                 <button className="btn-cta-main" style={{ display: 'inline-flex', width: 'auto' }} onClick={() => setShowHairTest(true)}>
                   <span>GET YOUR CUSTOM REGROWTH PLAN</span>
-                  <span>➔</span>
+                  <span className="arrow">➔</span>
                 </button>
               </div>
             </div>
@@ -931,7 +1216,7 @@ export default function App() {
                 cartItems.map((item, idx) => (
                   <div key={idx} className="cart-item-card-v2">
                     <div className="cart-item-img-box">
-                      {item.iconComponent}
+                      {item.iconComponent || <img src={productImage} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />}
                     </div>
                     
                     <div className="cart-item-info">
@@ -939,9 +1224,9 @@ export default function App() {
                       <div className="cart-item-meta">✓ Doctor Formulated</div>
                       
                       <div className="cart-qty-control">
-                        <button className="qty-btn" onClick={() => removeFromCart(idx)}>-</button>
+                        <button className="qty-btn" onClick={() => updateCartQuantity(item, 0)}>-</button>
                         <span className="qty-val">1</span>
-                        <button className="qty-btn" onClick={() => addToCart(item)}>+</button>
+                        <button className="qty-btn" onClick={() => updateCartQuantity(item, 2)}>+</button>
                       </div>
                     </div>
 
@@ -986,6 +1271,11 @@ export default function App() {
                   <button 
                     className="btn-cta-main" 
                     onClick={() => {
+                      const token = userToken || localStorage.getItem('kanchara_auth_token') || undefined;
+                      const sessionId = localStorage.getItem('kanchara_session_id') || `sess_${Date.now()}`;
+                      trackCheckoutClickAPI({ session_id: sessionId, cart_id: cartItems[0]?.product_id || cartItems[0]?.id }, token).catch(err => {
+                        console.warn('POST /api/checkout-click error:', err);
+                      });
                       setShowCart(false);
                       setCurrentView('checkout');
                     }}
@@ -1146,48 +1436,50 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="site-footer">
-        <div className="footer-inner">
-          <div className="footer-brand">
-            <div className="brand-logo" onClick={() => setCurrentView('home')} style={{ cursor: 'pointer' }}>
-              <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '64px', width: 'auto' }} />
+      {!['profile', 'wishlist'].includes(currentView) && (
+        <footer className="site-footer">
+          <div className="footer-inner">
+            <div className="footer-brand">
+              <div className="brand-logo" onClick={() => setCurrentView('home')} style={{ cursor: 'pointer' }}>
+                <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '64px', width: 'auto' }} />
+              </div>
+              <p>Targeting hair loss root causes with customized 3-Science holistic healthcare.</p>
             </div>
-            <p>Targeting hair loss root causes with customized 3-Science holistic healthcare.</p>
+
+            <div>
+              <h4 className="footer-col-title">3-Science System</h4>
+              <ul className="footer-links">
+                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Ayurveda Dosha Healing</a></li>
+                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Clinical Dermatology</a></li>
+                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Targeted Root Nutrition</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="footer-col-title">Shop & Catalog</h4>
+              <ul className="footer-links">
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>All Formulations</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Complete Regrowth Kits</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Hair Peptide Serums</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="footer-col-title">Support</h4>
+              <ul className="footer-links">
+                <li><a href="mailto:support@kanchara.health">support@kanchara.health</a></li>
+                <li><a href="#">Mon - Sat: 9:00 AM - 7:00 PM</a></li>
+                <li><a href="#">Privacy Policy & Terms</a></li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <h4 className="footer-col-title">3-Science System</h4>
-            <ul className="footer-links">
-              <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Ayurveda Dosha Healing</a></li>
-              <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Clinical Dermatology</a></li>
-              <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Targeted Root Nutrition</a></li>
-            </ul>
+          <div className="footer-bottom-line">
+            <span>© {new Date().getFullYear()} KANCHARA Health Technologies Inc. All rights reserved.</span>
+            <span>Designed with Clinical Excellence</span>
           </div>
-
-          <div>
-            <h4 className="footer-col-title">Shop & Catalog</h4>
-            <ul className="footer-links">
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>All Formulations</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Complete Regrowth Kits</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Hair Peptide Serums</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="footer-col-title">Support</h4>
-            <ul className="footer-links">
-              <li><a href="mailto:support@kanchara.health">support@kanchara.health</a></li>
-              <li><a href="#">Mon - Sat: 9:00 AM - 7:00 PM</a></li>
-              <li><a href="#">Privacy Policy & Terms</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom-line">
-          <span>© {new Date().getFullYear()} KANCHARA Health Technologies Inc. All rights reserved.</span>
-          <span>Designed with Clinical Excellence</span>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   );
 }

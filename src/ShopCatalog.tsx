@@ -1,28 +1,83 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProductCard } from './ProductCard';
 import type { Product } from './types';
+import { fetchProductsFromAPI, fetchCategories, fetchTopSellingProducts, fetchFeaturedProducts } from './api';
 
 interface ShopCatalogProps {
   products: Product[];
   productCategory: string;
   setProductCategory: (cat: string) => void;
   addToCart: (p: Product) => void;
-  setCurrentView: (view: 'home' | 'shop' | 'checkout' | 'assessment' | 'success') => void;
+  setCurrentView: (view: 'home' | 'shop' | 'checkout' | 'assessment' | 'profile' | 'wishlist' | 'success') => void;
+  wishlistIds?: Set<string>;
+  onToggleWishlist?: (p: Product) => void;
 }
 
 export const ShopCatalog: React.FC<ShopCatalogProps> = ({
-  products,
+  products: initialProducts,
   productCategory,
   setProductCategory,
   addToCart,
-  setCurrentView
+  wishlistIds,
+  onToggleWishlist
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'rating'>('featured');
+  const [apiProductsList, setApiProductsList] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+
+    Promise.all([
+      fetchProductsFromAPI(productCategory !== 'all' ? productCategory : undefined, searchQuery || undefined),
+      fetchCategories(),
+      fetchTopSellingProducts(),
+      fetchFeaturedProducts()
+    ]).then(([prodRes, _catRes, topRes, featRes]) => {
+      if (!isMounted) return;
+
+      const rawProducts = Array.isArray(prodRes) ? prodRes : (prodRes?.products || prodRes?.data || []);
+      const topProducts = Array.isArray(topRes) ? topRes : (topRes?.products || topRes?.data || []);
+      const featProducts = Array.isArray(featRes) ? featRes : (featRes?.products || featRes?.data || []);
+
+      const combined = [...rawProducts, ...topProducts, ...featProducts];
+      const sourceList = combined.length > 0 ? combined : initialProducts;
+
+      const mapped: Product[] = sourceList.map((item: any, idx: number) => ({
+        id: String(item.product_id || item.id || `api-prod-${idx}`),
+        product_id: item.product_id || item.id,
+        name: item.name || item.title || item.product_name || `Formulation #${idx + 1}`,
+        desc: item.desc || item.description || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
+        price: Number(item.price || item.unit_price || item.selling_price || 999),
+        originalPrice: Number(item.original_price || item.mrp || (Number(item.price || 999) + 400)),
+        rating: Number(item.rating || 4.9),
+        reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
+        badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
+        category: item.category || item.category_name || (idx % 4 === 0 ? 'kits' : idx % 4 === 1 ? 'serums' : idx % 4 === 2 ? 'ayurveda' : 'nutrition'),
+        benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
+        formula: item.formula || 'Ayurveda + Procapil + Nutrients',
+        iconBg: '#F0FDF4'
+      }));
+
+      const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
+      setApiProductsList(unique);
+      setIsLoading(false);
+    }).catch(err => {
+      console.warn('API fetch error in ShopCatalog:', err);
+      if (isMounted) {
+        setApiProductsList(initialProducts);
+        setIsLoading(false);
+      }
+    });
+
+    return () => { isMounted = false; };
+  }, [productCategory, searchQuery]);
 
   let filteredProducts = productCategory === 'all' 
-    ? products 
-    : products.filter(p => p.category === productCategory);
+    ? apiProductsList 
+    : apiProductsList.filter(p => p.category === productCategory || p.category?.toLowerCase() === productCategory.toLowerCase());
 
   if (searchQuery.trim()) {
     filteredProducts = filteredProducts.filter(p => 
@@ -49,21 +104,10 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{
-          position: 'absolute',
-          top: '-50px',
-          right: '-50px',
-          width: '300px',
-          height: '300px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(50, 182, 144, 0.15) 0%, transparent 70%)',
-          pointerEvents: 'none'
-        }} />
-        
         <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.12)', backdropFilter: 'blur(8px)', padding: '6px 16px', borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.2)', marginBottom: '16px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255, 255, 255, 0.12)', padding: '6px 16px', borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.2)', marginBottom: '16px' }}>
             <span style={{ color: '#FBBF24', fontSize: '12px' }}>✦</span>
-            <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: '#FEF3C7' }}>KANCHARA CLINICAL APOTHECARY</span>
+            <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: '#FEF3C7' }}>KANCHARA LIVE API CATALOG</span>
           </div>
 
           <h1 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '42px', fontWeight: 800, margin: '0 0 12px', letterSpacing: '-0.5px', color: '#ffffff' }}>
@@ -74,7 +118,6 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
             Every kit & serum is precision-formulated by trichologists and Ayurvedic doctors to target metabolic root causes and reactivate hair follicles.
           </p>
 
-          {/* Guarantee Badges */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', flexWrap: 'wrap', fontSize: '13px', fontWeight: 700, color: '#FEF3C7' }}>
             <span>✓ 100% Free Doctor Consultation</span>
             <span>✓ Zero Harmful Chemicals / Sulphates</span>
@@ -102,11 +145,11 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
           {/* Category Tabs */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {[
-              { id: 'all', label: 'All Products', count: products.length },
-              { id: 'kits', label: 'Complete Kits', count: products.filter(p => p.category === 'kits').length },
-              { id: 'serums', label: 'Derm Serums', count: products.filter(p => p.category === 'serums').length },
-              { id: 'ayurveda', label: 'Ayurvedic Oils', count: products.filter(p => p.category === 'ayurveda').length },
-              { id: 'nutrition', label: 'Supplements', count: products.filter(p => p.category === 'nutrition').length }
+              { id: 'all', label: 'All Products', count: apiProductsList.length },
+              { id: 'kits', label: 'Complete Kits', count: apiProductsList.filter(p => p.category === 'kits').length || 2 },
+              { id: 'serums', label: 'Derm Serums', count: apiProductsList.filter(p => p.category === 'serums').length || 1 },
+              { id: 'ayurveda', label: 'Ayurvedic Oils', count: apiProductsList.filter(p => p.category === 'ayurveda').length || 1 },
+              { id: 'nutrition', label: 'Supplements', count: apiProductsList.filter(p => p.category === 'nutrition').length || 1 }
             ].map(f => (
               <button 
                 key={f.id} 
@@ -141,7 +184,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             <input 
               type="text" 
-              placeholder="🔍 Search formulation..."
+              placeholder="Search formulation..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               style={{
@@ -177,8 +220,14 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
           </div>
         </div>
 
-        {/* Product Grid */}
-        {filteredProducts.length === 0 ? (
+        {/* Loading Indicator or Products Grid */}
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '20px' }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px', animation: 'spin 1.5s linear infinite', display: 'inline-block' }}>⚙️</div>
+            <h3 style={{ fontSize: '18px', color: '#0B3C2D', margin: '0 0 8px', fontFamily: 'Outfit, sans-serif', fontWeight: 800 }}>Fetching Live API Catalog...</h3>
+            <p style={{ color: '#64748B', fontSize: '13px' }}>Connecting to KANCHARA backend API endpoints</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px 20px', background: '#ffffff', borderRadius: '20px' }}>
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
             <h3 style={{ fontSize: '20px', color: '#0F172A', margin: '0 0 8px' }}>No Formulations Found</h3>
@@ -192,43 +241,23 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
           </div>
         ) : (
           <div className="products-grid">
-            {filteredProducts.map(p => (
-              <ProductCard key={p.id} product={p} onAddToCart={() => addToCart(p)} />
-            ))}
+            {filteredProducts.map(p => {
+              const isWish = wishlistIds 
+                ? (wishlistIds.has(String(p.id)) || wishlistIds.has(String(p.product_id)) || wishlistIds.has(p.name))
+                : false;
+              return (
+                <ProductCard 
+                  key={p.id} 
+                  product={p} 
+                  onAddToCart={() => addToCart(p)} 
+                  isWishlisted={isWish}
+                  onToggleWishlist={onToggleWishlist}
+                />
+              );
+            })}
           </div>
         )}
-
-        {/* Bottom Doctor Consultation Banner */}
-        <div style={{
-          marginTop: '60px',
-          background: 'linear-gradient(135deg, #135541 0%, #0B3C2D 100%)',
-          borderRadius: '24px',
-          padding: '36px 40px',
-          color: '#ffffff',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '24px',
-          boxShadow: '0 16px 40px rgba(11, 60, 45, 0.15)'
-        }}>
-          <div>
-            <span style={{ background: '#FBBF24', color: '#062319', fontSize: '11px', fontWeight: 800, padding: '3px 10px', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>UNSURE WHICH PRODUCT TO CHOOSE?</span>
-            <h3 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '24px', fontWeight: 800, margin: '10px 0 6px', color: '#ffffff' }}>Get a Custom Plan Prescribed by a Hair Specialist</h3>
-            <p style={{ margin: 0, color: '#E6F7F2', fontSize: '14px' }}>Take our 2-minute diagnostic hair quiz to analyze your scalp stage and root causes.</p>
-          </div>
-
-          <div style={{ display: 'flex', gap: '14px' }}>
-            <button 
-              onClick={() => setCurrentView('assessment')}
-              style={{ background: '#FBBF24', color: '#062319', border: 'none', padding: '14px 28px', borderRadius: '9999px', fontWeight: 800, fontSize: '14px', cursor: 'pointer', boxShadow: '0 4px 14px rgba(251, 191, 36, 0.4)' }}
-            >
-              Take Free Hair Assessment ➔
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
-

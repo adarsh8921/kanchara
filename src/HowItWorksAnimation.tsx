@@ -251,6 +251,7 @@ export const HowItWorksAnimation: React.FC = () => {
               return (
                 <div
                   key={idx}
+                  className={`how-it-works-step-card ${isActive ? 'active' : ''}`}
                   onClick={() => {
                     setActiveStep(idx);
                     setIsAutoPlaying(false);
@@ -258,20 +259,39 @@ export const HowItWorksAnimation: React.FC = () => {
                   style={{
                     background: isActive ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
                     border: `1.5px solid ${isActive ? step.accentColor : 'rgba(255, 255, 255, 0.08)'}`,
+                    borderLeft: isActive ? `5px solid ${step.accentColor}` : '1.5px solid rgba(255, 255, 255, 0.08)',
                     borderRadius: '24px',
                     padding: '24px 28px',
                     cursor: 'pointer',
-                    transition: 'all 0.35s ease',
+                    transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
                     position: 'relative',
-                    boxShadow: isActive ? `0 12px 30px ${step.accentColor}25` : 'none'
+                    overflow: 'hidden',
+                    boxShadow: isActive ? `0 16px 36px ${step.accentColor}30` : 'none',
+                    transform: isActive ? 'translateX(6px)' : 'translateX(0)'
                   }}
                 >
+                  {/* Active Step Auto-Progress Bar Indicator */}
+                  {isActive && isAutoPlaying && (
+                    <div 
+                      key={`progress-${activeStep}`}
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        height: '3px',
+                        background: step.accentColor,
+                        animation: 'autoProgressBar 4s linear forwards'
+                      }}
+                    />
+                  )}
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span style={{
                       fontSize: '11px',
                       fontWeight: 800,
                       color: isActive ? step.accentColor : '#94A3B8',
-                      letterSpacing: '1px'
+                      letterSpacing: '1px',
+                      transition: 'color 0.3s ease'
                     }}>
                       {step.stage} • {step.subtitle}
                     </span>
@@ -282,8 +302,9 @@ export const HowItWorksAnimation: React.FC = () => {
                         color: '#062319',
                         fontSize: '10px',
                         fontWeight: 800,
-                        padding: '2px 8px',
-                        borderRadius: '9999px'
+                        padding: '3px 10px',
+                        borderRadius: '9999px',
+                        boxShadow: `0 4px 12px ${step.accentColor}50`
                       }}>
                         ACTIVE STAGE
                       </span>
@@ -295,7 +316,8 @@ export const HowItWorksAnimation: React.FC = () => {
                     fontSize: '20px',
                     fontWeight: 800,
                     margin: '0 0 8px',
-                    color: isActive ? '#ffffff' : '#CBD5E1'
+                    color: isActive ? '#ffffff' : '#CBD5E1',
+                    transition: 'color 0.3s ease'
                   }}>
                     {step.title}
                   </h3>
@@ -306,7 +328,7 @@ export const HowItWorksAnimation: React.FC = () => {
                       fontSize: '14px',
                       lineHeight: 1.6,
                       margin: 0,
-                      animation: 'fadeIn 0.3s ease'
+                      animation: 'fadeIn 0.35s ease'
                     }}>
                       {step.desc}
                     </p>
@@ -320,6 +342,18 @@ export const HowItWorksAnimation: React.FC = () => {
 
       {/* Embedded CSS Animations */}
       <style>{`
+        @keyframes autoProgressBar {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        .how-it-works-step-card:hover {
+          transform: translateX(6px) !important;
+          background: rgba(255, 255, 255, 0.08) !important;
+          border-color: rgba(255, 255, 255, 0.25) !important;
+        }
+        .how-it-works-step-card:hover h3 {
+          color: #ffffff !important;
+        }
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -330,16 +364,12 @@ export const HowItWorksAnimation: React.FC = () => {
         }
         @keyframes pulseGlow {
           0%, 100% { transform: scale(0.96); opacity: 0.35; }
-          50% { transform: scale(1.05); opacity: 0.75; }
+          50% { transform: scale(1.06); opacity: 0.8; }
         }
         @keyframes smoothFloat {
           0% { transform: scale(1.28) translateY(0px) rotate(0deg); }
-          50% { transform: scale(1.28) translateY(-14px) rotate(1.5deg); }
+          50% { transform: scale(1.28) translateY(-14px) rotate(1.8deg); }
           100% { transform: scale(1.28) translateY(0px) rotate(0deg); }
-        }
-        @keyframes smoothCrossfade {
-          0% { opacity: 0.3; transform: scale(1.15) translateY(8px); }
-          100% { opacity: 1; transform: scale(1.28) translateY(0px); }
         }
         @keyframes scanLaser {
           0% { top: 12%; opacity: 0.15; }
@@ -351,7 +381,7 @@ export const HowItWorksAnimation: React.FC = () => {
           100% { transform: scale(1); opacity: 1; }
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(4px); }
+          from { opacity: 0; transform: translateY(6px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .bio-particle {

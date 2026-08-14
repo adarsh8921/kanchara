@@ -2,6 +2,7 @@ import React from 'react';
 
 export interface Product {
   id: string;
+  product_id?: string | number;
   name: string;
   category: 'kits' | 'serums' | 'ayurveda' | 'nutrition';
   price: number;
@@ -10,7 +11,7 @@ export interface Product {
   reviewsCount: number;
   badge: string;
   desc: string;
-  iconComponent: React.ReactNode;
+  iconComponent?: React.ReactNode;
 }
 
 export const stageData: Record<number, { title: string; desc: string; rev: string; plan: string }> = {
