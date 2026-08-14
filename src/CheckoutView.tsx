@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Product } from './types';
 import productImage from './assets/bottle.png';
-import { submitCheckoutAPI, validateCouponAPI, fetchDeliveryAddressesAPI, addDeliveryAddressAPI, updateDeliveryAddressAPI, deleteDeliveryAddressAPI } from './api';
+import { submitCheckoutAPI, validateCouponAPI, fetchDeliveryAddressesAPI, addDeliveryAddressAPI, updateDeliveryAddressAPI, deleteDeliveryAddressAPI, fetchShowCustomer } from './api';
 import { Icons } from './Icons';
 
 interface CheckoutViewProps {
@@ -27,18 +27,45 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Patient Address Form States
-  const [firstName, setFirstName] = useState('Rahul');
-  const [lastName, setLastName] = useState('Sharma');
-  const [phone, setPhone] = useState('+91 98765 43210');
-  const [address, setAddress] = useState('42, Green Avenue, Sector 15');
-  const [cityState, setCityState] = useState('Bengaluru, Karnataka');
-  const [pincode, setPincode] = useState('560001');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [cityState, setCityState] = useState('');
+  const [pincode, setPincode] = useState('');
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | number | null>(null);
 
   useEffect(() => {
+    const savedUser = localStorage.getItem('kanchara_user_data');
+    if (savedUser) {
+      try {
+        const u = JSON.parse(savedUser);
+        if (u.first_name) setFirstName(u.first_name);
+        if (u.last_name) setLastName(u.last_name);
+        if (u.phone) setPhone(u.phone);
+        if (u.address) setAddress(u.address);
+        if (u.city || u.state) setCityState([u.city, u.state].filter(Boolean).join(', '));
+        if (u.zip || u.postal_code) setPincode(u.zip || u.postal_code);
+      } catch (e) {}
+    } else {
+      const savedPhone = localStorage.getItem('kanchara_user_phone');
+      if (savedPhone) setPhone(savedPhone);
+    }
+
     const token = localStorage.getItem('kanchara_auth_token');
     if (token) {
+      fetchShowCustomer(token).then(cust => {
+        if (cust) {
+          if (cust.first_name) setFirstName(cust.first_name);
+          if (cust.last_name) setLastName(cust.last_name);
+          if (cust.phone) setPhone(cust.phone);
+          if (cust.address) setAddress(cust.address);
+          if (cust.city || cust.state) setCityState([cust.city, cust.state].filter(Boolean).join(', '));
+          if (cust.zip || cust.postal_code) setPincode(cust.zip || cust.postal_code);
+        }
+      }).catch(() => {});
+
       fetchDeliveryAddressesAPI(token).then(data => {
         const list = Array.isArray(data) ? data : (data?.addresses || data?.data || []);
         if (Array.isArray(list) && list.length > 0) {
@@ -46,7 +73,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
           const first = list[0];
           setSelectedAddressId(first.id || first.address_id || first.delivery_address_id || null);
           if (first.address_line1) setAddress(first.address_line1);
-          if (first.city || first.state) setCityState(`${first.city || ''}, ${first.state || ''}`);
+          if (first.city || first.state) setCityState([first.city, first.state].filter(Boolean).join(', '));
           if (first.postal_code) setPincode(first.postal_code);
           if (first.phone) setPhone(first.phone);
         }
@@ -93,12 +120,16 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
     setIsSubmitting(true);
     const token = localStorage.getItem('kanchara_auth_token') || undefined;
 
+    const parts = cityState.split(',').map(s => s.trim()).filter(Boolean);
+    const stateName = parts.length > 1 ? parts[1] : (parts[0] || 'Karnataka');
+    const cityName = parts[0] || 'Bengaluru';
+
     if (token) {
       const addressPayload = {
         phone: phone,
         address_line1: address,
-        city: cityState.split(',')[0]?.trim() || cityState,
-        state: cityState.split(',')[1]?.trim() || 'Karnataka',
+        city: cityName,
+        state: stateName,
         postal_code: pincode,
         country: 'India',
         is_default: true
@@ -117,8 +148,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
 
     const sessionId = localStorage.getItem('kanchara_session_id') || `sess_${Date.now()}`;
     const payload = {
-      delivery_state: cityState,
-      coupon_code: couponApplied ? couponCode || 'SPECIAL150' : undefined,
+      delivery_state: stateName,
+      coupon_code: couponApplied ? (couponCode || 'SPECIAL150') : undefined,
       total_amount: finalTotal,
       actual_total_amount: cartTotal,
       session_id: sessionId,
