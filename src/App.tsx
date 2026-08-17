@@ -557,6 +557,8 @@ export default function App() {
           setPaymentMethod={setPaymentMethod}
           setCartItems={setCartItems}
           setCurrentView={setCurrentView}
+          isLoggedIn={isLoggedIn}
+          setShowAuthModal={setShowAuthModal}
         />
       ) : currentView === 'success' ? (
         <section className="section-checkout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1276,6 +1278,13 @@ export default function App() {
                       trackCheckoutClickAPI({ session_id: sessionId, cart_id: cartItems[0]?.product_id || cartItems[0]?.id }, token).catch(err => {
                         console.warn('POST /api/checkout-click error:', err);
                       });
+
+                      if (!isLoggedIn && !token) {
+                        setShowCart(false);
+                        setShowAuthModal(true);
+                        return;
+                      }
+
                       setShowCart(false);
                       setCurrentView('checkout');
                     }}

@@ -41,6 +41,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   const [updateStatusMsg, setUpdateStatusMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [apiOrders, setApiOrders] = useState<any[]>([]);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     if (isLoggedIn && userToken) {
@@ -236,13 +237,99 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
 
           <button 
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.3)', padding: '10px 22px', borderRadius: '9999px', fontWeight: 700, fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s ease' }}
           >
             Sign Out Account
           </button>
         </div>
       </div>
+
+      {/* Sign Out Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#ffffff',
+            borderRadius: '20px',
+            padding: '28px',
+            maxWidth: '400px',
+            width: '100%',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            textAlign: 'center',
+            border: '1px solid #E2E8F0'
+          }}>
+            <div style={{
+              width: '54px',
+              height: '54px',
+              borderRadius: '50%',
+              background: '#FEE2E2',
+              color: '#DC2626',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              fontSize: '24px'
+            }}>
+              ⚠️
+            </div>
+            <h3 style={{ margin: '0 0 8px', fontSize: '20px', fontWeight: 800, color: '#0F172A', fontFamily: 'Outfit, sans-serif' }}>
+              Sign Out Confirmation
+            </h3>
+            <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#64748B', lineHeight: 1.5 }}>
+              Are you sure you want to sign out of your account? You will need to log in again with OTP.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                style={{
+                  flex: 1,
+                  padding: '11px 18px',
+                  borderRadius: '12px',
+                  border: '1px solid #CBD5E1',
+                  background: '#F8FAFC',
+                  color: '#475569',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLogoutConfirm(false);
+                  handleLogout();
+                }}
+                style={{
+                  flex: 1,
+                  padding: '11px 18px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: '#DC2626',
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                Yes, Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Container */}
       <div style={{ maxWidth: '1200px', margin: '-40px auto 0', padding: '0 24px', position: 'relative', zIndex: 10 }}>
