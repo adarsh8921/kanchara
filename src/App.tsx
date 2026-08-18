@@ -825,10 +825,10 @@ export default function App() {
               ))}
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '36px' }}>
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button 
                 className="btn-cta-main" 
-                style={{ display: 'inline-flex', width: 'auto', padding: '14px 32px' }}
+                style={{ display: 'inline-flex', width: 'auto', padding: '10px 24px', fontSize: '12px' }}
                 onClick={() => setCurrentView('shop')}
               >
                 <span>EXPLORE ALL PRODUCTS PAGE</span>
@@ -1176,19 +1176,19 @@ export default function App() {
             <div className="stats-grid">
               <div className="stat-box">
                 <h3>93%</h3>
-                <p>Clinical Success Rate in 5 Months</p>
+                <p>Clinical Efficacy Rate in 5 Months</p>
               </div>
               <div className="stat-box">
-                <h3>310,000+</h3>
-                <p>Custom Hair Plans Generated</p>
+                <h3>3-in-1</h3>
+                <p>Synergistic Regrowth System</p>
               </div>
               <div className="stat-box">
                 <h3>4.9 / 5</h3>
-                <p>Based on 48,000+ Certified Reviews</p>
+                <p>Verified Patient Rating</p>
               </div>
               <div className="stat-box">
-                <h3>1-on-1</h3>
-                <p>Dedicated Personal Hair Coach</p>
+                <h3>100%</h3>
+                <p>Pure, Toxin-Free & Doctor Formulated</p>
               </div>
             </div>
           </section>
@@ -1509,37 +1509,57 @@ export default function App() {
       {/* Footer */}
       {!['assessment', 'profile', 'wishlist'].includes(currentView) && (
         <footer className="site-footer">
+          {/* Top Accreditation Ribbon */}
+          <div className="footer-accreditation-bar">
+            <div className="accreditation-inner">
+              <span>✦ 3-Science Regrowth System</span>
+              <span>✦ ISO & Ayush Certified</span>
+              <span>✦ 100% Toxin-Free Formulations</span>
+              <span>✦ Free Doctor Consultation</span>
+            </div>
+          </div>
+
           <div className="footer-inner">
+            {/* Column 1: Brand & Mission */}
             <div className="footer-brand">
-              <div className="brand-logo" onClick={() => setCurrentView('home')} style={{ cursor: 'pointer' }}>
-                <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '42px', width: 'auto' }} />
+              <div className="brand-logo" onClick={() => setCurrentView('home')} style={{ cursor: 'pointer', marginBottom: '10px' }}>
+                <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '40px', width: 'auto' }} />
               </div>
-              <p>Targeting hair loss root causes with customized 3-Science holistic healthcare.</p>
+              <p>Reversing hair loss root causes through customized Ayurveda, Dermatology, and Targeted Nutrition.</p>
+              <div className="footer-badge-pill">
+                🛡️ Verified Healthcare Partner
+              </div>
             </div>
 
+            {/* Column 2: 3-Science System */}
             <div>
               <h4 className="footer-col-title">3-Science System</h4>
               <ul className="footer-links">
-                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Ayurveda Dosha Healing</a></li>
-                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Clinical Dermatology</a></li>
-                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Targeted Root Nutrition</a></li>
+                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Ayurvedic Pitta Healing</a></li>
+                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Clinical Redensyl & Procapil</a></li>
+                <li><a href="#three-sciences" onClick={() => setCurrentView('home')}>Targeted Root Biotin</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setShowHairTest(true); }}>Free 3-Min Hair Test</a></li>
               </ul>
             </div>
 
+            {/* Column 3: Shop & Formulations */}
             <div>
-              <h4 className="footer-col-title">Shop & Catalog</h4>
+              <h4 className="footer-col-title">Shop Formulations</h4>
               <ul className="footer-links">
                 <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>All Formulations</a></li>
                 <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Complete Regrowth Kits</a></li>
-                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Hair Peptide Serums</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Derm Scalp Serums</a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('shop'); }}>Ayurvedic Pitta Oils</a></li>
               </ul>
             </div>
 
+            {/* Column 4: Patient Support */}
             <div>
-              <h4 className="footer-col-title">Support</h4>
+              <h4 className="footer-col-title">Patient Support</h4>
               <ul className="footer-links">
-                <li><a href="mailto:support@kanchara.health">support@kanchara.health</a></li>
-                <li><a href="#">Mon - Sat: 9:00 AM - 7:00 PM</a></li>
+                <li><a href="mailto:support@kanchara.health">✉️ support@kanchara.health</a></li>
+                <li><span>🕒 Mon - Sat: 9:00 AM - 7:00 PM</span></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('profile'); }}>Orders & Tracking</a></li>
                 <li><a href="#">Privacy Policy & Terms</a></li>
               </ul>
             </div>
@@ -1547,7 +1567,7 @@ export default function App() {
 
           <div className="footer-bottom-bar">
             <span>© {new Date().getFullYear()} KANCHARA Health Technologies Inc. All rights reserved.</span>
-            <span>Clinical Excellence & 3-Science Care</span>
+            <span style={{ color: '#32B690', fontWeight: 700 }}>Clinical Excellence • 3-Science Care</span>
           </div>
         </footer>
       )}

@@ -56,7 +56,7 @@ export const HowItWorksAnimation: React.FC = () => {
     <section className="how-it-works-animation-section" style={{
       background: 'linear-gradient(180deg, #062319 0%, #0B3C2D 50%, #062319 100%)',
       color: '#ffffff',
-      padding: '80px 40px',
+      padding: '36px 20px 44px',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -65,51 +65,51 @@ export const HowItWorksAnimation: React.FC = () => {
         position: 'absolute',
         top: '10%',
         left: '5%',
-        width: '350px',
-        height: '350px',
+        width: '250px',
+        height: '250px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(50, 182, 144, 0.18) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(50, 182, 144, 0.15) 0%, transparent 70%)',
         pointerEvents: 'none',
-        filter: 'blur(40px)'
+        filter: 'blur(30px)'
       }} />
       <div style={{
         position: 'absolute',
         bottom: '10%',
         right: '5%',
-        width: '400px',
-        height: '400px',
+        width: '280px',
+        height: '280px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(245, 158, 11, 0.12) 0%, transparent 70%)',
         pointerEvents: 'none',
-        filter: 'blur(50px)'
+        filter: 'blur(40px)'
       }} />
 
-      <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative', zIndex: 5 }}>
+      <div style={{ maxWidth: '1080px', margin: '0 auto', position: 'relative', zIndex: 5 }}>
         {/* Section Header */}
-        <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 60px' }}>
+        <div style={{ textAlign: 'center', maxWidth: '650px', margin: '0 auto 24px' }}>
           <div style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '6px',
             background: 'rgba(255, 255, 255, 0.1)',
             backdropFilter: 'blur(8px)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
-            padding: '6px 18px',
+            padding: '4px 14px',
             borderRadius: '9999px',
-            marginBottom: '16px'
+            marginBottom: '10px'
           }}>
-            <span style={{ color: '#FBBF24', fontSize: '12px' }}>⚡</span>
-            <span style={{ fontSize: '12px', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: '#FEF3C7' }}>
-              INTERACTIVE FORMULATION MECHANISM
+            <span style={{ color: '#FBBF24', fontSize: '11px' }}>⚡</span>
+            <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#FEF3C7' }}>
+              FORMULATION MECHANISM
             </span>
           </div>
 
-          <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: '38px', fontWeight: 800, margin: '0 0 16px', color: '#ffffff', letterSpacing: '-0.5px' }}>
+          <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 900, margin: '0 0 8px', color: '#ffffff', letterSpacing: '-0.3px' }}>
             How KANCHARA Regrowth Formula Works
           </h2>
 
-          <p style={{ color: '#E6F7F2', fontSize: '16px', lineHeight: 1.6, margin: 0 }}>
-            Experience how our 3-Science synergistic formula reverses hair loss at the root cause step-by-step.
+          <p style={{ color: '#E6F7F2', fontSize: '13px', lineHeight: 1.4, margin: 0 }}>
+            Our 3-Science synergistic formula reverses hair loss at the root cause step-by-step.
           </p>
         </div>
 
@@ -117,56 +117,48 @@ export const HowItWorksAnimation: React.FC = () => {
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1.1fr',
-          gap: '48px',
+          gap: '24px',
           alignItems: 'center'
         }}>
-          {/* Left Column: Product Interactive Animated Spotlight Showcase */}
+          {/* Left Column: Product Spotlight Showcase */}
           <div style={{
             background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(16px)',
-            borderRadius: '32px',
+            backdropFilter: 'blur(12px)',
+            borderRadius: '20px',
             border: '1px solid rgba(255, 255, 255, 0.12)',
-            padding: '40px',
+            padding: '20px',
             position: 'relative',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            boxShadow: '0 30px 60px rgba(0, 0, 0, 0.3)'
+            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.25)'
           }}>
-            {/* Animated Pulse Waves around Product */}
+            {/* Animated Spotlight Area */}
             <div style={{
               position: 'relative',
-              width: '300px',
-              height: '340px',
+              width: '200px',
+              height: '210px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: '24px'
+              marginBottom: '16px'
             }}>
               {/* Orbital Ring 1 */}
               <div style={{
                 position: 'absolute',
-                inset: '-15px',
+                inset: '-10px',
                 borderRadius: '50%',
                 border: `2px dashed ${steps[activeStep].accentColor}`,
                 opacity: 0.5,
                 animation: 'spin 10s linear infinite',
                 transition: 'border-color 0.8s ease'
               }} />
-              {/* Orbital Ring 2 (Reverse) */}
-              <div style={{
-                position: 'absolute',
-                inset: '-35px',
-                borderRadius: '50%',
-                border: '1.5px solid rgba(255, 255, 255, 0.15)',
-                animation: 'spinReverse 16s linear infinite'
-              }} />
               {/* Pulse Glow Background */}
               <div style={{
                 position: 'absolute',
-                inset: '-50px',
+                inset: '-30px',
                 borderRadius: '50%',
-                background: `radial-gradient(circle, ${steps[activeStep].accentColor}35 0%, transparent 70%)`,
+                background: `radial-gradient(circle, ${steps[activeStep].accentColor}30 0%, transparent 70%)`,
                 animation: 'pulseGlow 2.5s ease-in-out infinite',
                 transition: 'background 0.8s ease'
               }} />
@@ -176,76 +168,65 @@ export const HowItWorksAnimation: React.FC = () => {
                 position: 'absolute',
                 left: '10%',
                 right: '10%',
-                height: '3px',
+                height: '2px',
                 background: `linear-gradient(90deg, transparent, ${steps[activeStep].accentColor}, #ffffff, ${steps[activeStep].accentColor}, transparent)`,
-                boxShadow: `0 0 15px ${steps[activeStep].accentColor}`,
+                boxShadow: `0 0 10px ${steps[activeStep].accentColor}`,
                 zIndex: 4,
-                animation: 'scanLaser 3s ease-in-out infinite',
-                transition: 'background 0.8s ease, box-shadow 0.8s ease'
+                animation: 'scanLaser 3s ease-in-out infinite'
               }} />
 
-              {/* Floating Bio-Particles */}
-              <div className="bio-particle p1" style={{ background: steps[activeStep].accentColor }} />
-              <div className="bio-particle p2" style={{ background: '#FBBF24' }} />
-              <div className="bio-particle p3" style={{ background: steps[activeStep].accentColor }} />
-
-              {/* Product Bottle Image with Ultra-Smooth Continuous Morphing & Glow Transition */}
               <img 
                 src={productImage} 
                 alt="KANCHARA Formulation"
                 style={{
-                  maxHeight: '115%',
-                  maxWidth: '115%',
+                  maxHeight: '100%',
+                  maxWidth: '100%',
                   objectFit: 'contain',
                   position: 'relative',
                   zIndex: 3,
-                  filter: `drop-shadow(0 20px 35px ${steps[activeStep].accentColor}60) drop-shadow(0 8px 16px rgba(0,0,0,0.6))`,
-                  transition: 'filter 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                  animation: 'smoothFloat 6s ease-in-out infinite',
-                  willChange: 'transform, filter',
-                  transformStyle: 'preserve-3d'
+                  filter: `drop-shadow(0 14px 24px ${steps[activeStep].accentColor}50)`,
+                  transition: 'filter 0.8s ease',
+                  animation: 'smoothFloat 6s ease-in-out infinite'
                 }}
               />
 
               {/* Floating Stage Badge */}
               <div style={{
                 position: 'absolute',
-                bottom: '-14px',
+                bottom: '-10px',
                 background: steps[activeStep].accentColor,
                 color: '#062319',
                 fontWeight: 800,
-                fontSize: '11px',
-                padding: '7px 20px',
+                fontSize: '10px',
+                padding: '4px 14px',
                 borderRadius: '9999px',
                 zIndex: 10,
-                boxShadow: `0 10px 25px ${steps[activeStep].accentColor}60`,
-                letterSpacing: '0.5px',
-                animation: 'popBadge 0.4s ease'
+                letterSpacing: '0.4px'
               }}>
                 {steps[activeStep].badge}
               </div>
             </div>
 
-            {/* Live Clinical Metric Counter Pill */}
+            {/* Metric Counter Pill */}
             <div style={{
               background: 'rgba(255, 255, 255, 0.08)',
               border: '1px solid rgba(255, 255, 255, 0.15)',
-              borderRadius: '20px',
-              padding: '16px 24px',
+              borderRadius: '14px',
+              padding: '10px 16px',
               width: '100%',
               textAlign: 'center'
             }}>
-              <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+              <span style={{ fontSize: '10px', color: '#94A3B8', fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: '2px' }}>
                 CLINICAL IMPACT RATING
               </span>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 800, color: '#FBBF24' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: 900, color: '#FBBF24' }}>
                 {steps[activeStep].stat}
               </span>
             </div>
           </div>
 
-          {/* Right Column: Step-by-Step Interactive Timeline */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Right Column: Step Timeline */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {steps.map((step, idx) => {
               const isActive = activeStep === idx;
               return (
@@ -259,18 +240,15 @@ export const HowItWorksAnimation: React.FC = () => {
                   style={{
                     background: isActive ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.03)',
                     border: `1.5px solid ${isActive ? step.accentColor : 'rgba(255, 255, 255, 0.08)'}`,
-                    borderLeft: isActive ? `5px solid ${step.accentColor}` : '1.5px solid rgba(255, 255, 255, 0.08)',
-                    borderRadius: '24px',
-                    padding: '24px 28px',
+                    borderLeft: isActive ? `4px solid ${step.accentColor}` : '1.5px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '16px',
+                    padding: '14px 18px',
                     cursor: 'pointer',
-                    transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                    transition: 'all 0.25s ease',
                     position: 'relative',
-                    overflow: 'hidden',
-                    boxShadow: isActive ? `0 16px 36px ${step.accentColor}30` : 'none',
-                    transform: isActive ? 'translateX(6px)' : 'translateX(0)'
+                    overflow: 'hidden'
                   }}
                 >
-                  {/* Active Step Auto-Progress Bar Indicator */}
                   {isActive && isAutoPlaying && (
                     <div 
                       key={`progress-${activeStep}`}
@@ -278,58 +256,31 @@ export const HowItWorksAnimation: React.FC = () => {
                         position: 'absolute',
                         bottom: 0,
                         left: 0,
-                        height: '3px',
+                        height: '2.5px',
                         background: step.accentColor,
                         animation: 'autoProgressBar 4s linear forwards'
                       }}
                     />
                   )}
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{
-                      fontSize: '11px',
-                      fontWeight: 800,
-                      color: isActive ? step.accentColor : '#94A3B8',
-                      letterSpacing: '1px',
-                      transition: 'color 0.3s ease'
-                    }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 800, color: isActive ? step.accentColor : '#94A3B8', letterSpacing: '0.8px' }}>
                       {step.stage} • {step.subtitle}
                     </span>
 
                     {isActive && (
-                      <span style={{
-                        background: step.accentColor,
-                        color: '#062319',
-                        fontSize: '10px',
-                        fontWeight: 800,
-                        padding: '3px 10px',
-                        borderRadius: '9999px',
-                        boxShadow: `0 4px 12px ${step.accentColor}50`
-                      }}>
+                      <span style={{ background: step.accentColor, color: '#062319', fontSize: '9px', fontWeight: 800, padding: '2px 8px', borderRadius: '9999px' }}>
                         ACTIVE STAGE
                       </span>
                     )}
                   </div>
 
-                  <h3 style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: '20px',
-                    fontWeight: 800,
-                    margin: '0 0 8px',
-                    color: isActive ? '#ffffff' : '#CBD5E1',
-                    transition: 'color 0.3s ease'
-                  }}>
+                  <h3 style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: 800, margin: '0 0 4px', color: isActive ? '#ffffff' : '#CBD5E1' }}>
                     {step.title}
                   </h3>
 
                   {isActive && (
-                    <p style={{
-                      color: '#E6F7F2',
-                      fontSize: '14px',
-                      lineHeight: 1.6,
-                      margin: 0,
-                      animation: 'fadeIn 0.35s ease'
-                    }}>
+                    <p style={{ color: '#E6F7F2', fontSize: '12px', lineHeight: 1.45, margin: 0, animation: 'fadeIn 0.25s ease' }}>
                       {step.desc}
                     </p>
                   )}

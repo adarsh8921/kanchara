@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
       <header className={`navbar ${scrolled ? 'sticky glass-panel' : ''}`}>
         <div className="nav-container">
           <a href="#banner" className="brand-logo" onClick={(e) => { e.preventDefault(); setCurrentView('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
-            <img src={brandLogoImg} alt="KANCHARA Logo" className="brand-logo-img" style={{ height: '64px', width: 'auto' }} />
+            <img src={brandLogoImg} alt="KANCHARA Logo" className="brand-logo-img" style={{ height: scrolled ? '40px' : '50px', width: 'auto', transition: 'all 0.25s ease' }} />
           </a>
 
           <nav className="nav-menu">
