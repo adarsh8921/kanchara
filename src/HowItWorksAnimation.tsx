@@ -98,7 +98,7 @@ export const HowItWorksAnimation: React.FC = () => {
             borderRadius: '9999px',
             marginBottom: '10px'
           }}>
-            <span style={{ color: '#FBBF24', fontSize: '11px' }}>⚡</span>
+            {/* <span style={{ color: '#FBBF24', fontSize: '11px' }}>⚡</span> */}
             <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#FEF3C7' }}>
               FORMULATION MECHANISM
             </span>
@@ -175,8 +175,8 @@ export const HowItWorksAnimation: React.FC = () => {
                 animation: 'scanLaser 3s ease-in-out infinite'
               }} />
 
-              <img 
-                src={productImage} 
+              <img
+                src={productImage}
                 alt="KANCHARA Formulation"
                 style={{
                   maxHeight: '100%',
@@ -250,7 +250,7 @@ export const HowItWorksAnimation: React.FC = () => {
                   }}
                 >
                   {isActive && isAutoPlaying && (
-                    <div 
+                    <div
                       key={`progress-${activeStep}`}
                       style={{
                         position: 'absolute',
