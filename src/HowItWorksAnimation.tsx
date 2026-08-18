@@ -114,35 +114,11 @@ export const HowItWorksAnimation: React.FC = () => {
         </div>
 
         {/* Animation Main Interactive Showcase Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1.1fr',
-          gap: '24px',
-          alignItems: 'center'
-        }}>
+        <div className="how-it-works-main-grid">
           {/* Left Column: Product Spotlight Showcase */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(12px)',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.12)',
-            padding: '20px',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.25)'
-          }}>
+          <div className="how-it-works-spotlight-card">
             {/* Animated Spotlight Area */}
-            <div style={{
-              position: 'relative',
-              width: '200px',
-              height: '210px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '16px'
-            }}>
+            <div className="how-it-works-spotlight-area">
               {/* Orbital Ring 1 */}
               <div style={{
                 position: 'absolute',
@@ -226,7 +202,7 @@ export const HowItWorksAnimation: React.FC = () => {
           </div>
 
           {/* Right Column: Step Timeline */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div className="how-it-works-steps-column">
             {steps.map((step, idx) => {
               const isActive = activeStep === idx;
               return (
