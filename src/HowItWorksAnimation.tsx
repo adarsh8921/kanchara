@@ -104,7 +104,7 @@ export const HowItWorksAnimation: React.FC = () => {
             </span>
           </div>
 
-          <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '38px', fontWeight: 800, margin: '0 0 16px', color: '#ffffff', letterSpacing: '-0.5px' }}>
+          <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: '38px', fontWeight: 800, margin: '0 0 16px', color: '#ffffff', letterSpacing: '-0.5px' }}>
             How KANCHARA Regrowth Formula Works
           </h2>
 
@@ -238,7 +238,7 @@ export const HowItWorksAnimation: React.FC = () => {
               <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
                 CLINICAL IMPACT RATING
               </span>
-              <span style={{ fontFamily: 'Outfit, sans-serif', fontSize: '24px', fontWeight: 800, color: '#FBBF24' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 800, color: '#FBBF24' }}>
                 {steps[activeStep].stat}
               </span>
             </div>
@@ -312,7 +312,7 @@ export const HowItWorksAnimation: React.FC = () => {
                   </div>
 
                   <h3 style={{
-                    fontFamily: 'Outfit, sans-serif',
+                    fontFamily: 'Inter, sans-serif',
                     fontSize: '20px',
                     fontWeight: 800,
                     margin: '0 0 8px',

@@ -259,7 +259,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               ← Back to Shop
             </button>
             <span style={{ color: '#94A3B8' }}>|</span>
-            <span style={{ fontSize: '14px', fontWeight: 800, color: '#0B3C2D', letterSpacing: '0.3px', fontFamily: 'Outfit, sans-serif' }}>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: '#0B3C2D', letterSpacing: '0.3px', fontFamily: 'Inter, sans-serif' }}>
               🔒 SECURE CHECKOUT
             </span>
           </div>
@@ -301,7 +301,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 👤
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '14px', color: '#92400E', fontFamily: 'Outfit, sans-serif' }}>
+                <div style={{ fontWeight: 800, fontSize: '14px', color: '#92400E', fontFamily: 'Inter, sans-serif' }}>
                   Have an existing KANCHARA account?
                 </div>
                 <div style={{ fontSize: '12px', color: '#B45309', marginTop: '2px' }}>
@@ -370,7 +370,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '22px', borderBottom: '1px solid #F1F5F9', paddingBottom: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0B3C2D', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800 }}>1</span>
-                  <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                  <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
                     Shipping & Delivery Details
                   </h2>
                 </div>
@@ -390,7 +390,8 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                         onClick={() => {
                           setSelectedAddressId(addr.id || addr.address_id || addr.delivery_address_id || null);
                           if (addr.address_line1) setAddress(addr.address_line1);
-                          if (addr.city || addr.state) setCityState(`${addr.city || ''}, ${addr.state || ''}`);
+                          if (addr.city) setCityName(addr.city);
+                          if (addr.state) setSelectedState(matchStateOption(addr.state));
                           if (addr.postal_code) setPincode(addr.postal_code);
                           if (addr.phone) setPhone(addr.phone);
                         }}
@@ -519,7 +520,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 <Icons.Doctor />
               </div>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '14px', color: '#0B3C2D', fontFamily: 'Outfit, sans-serif' }}>
+                <div style={{ fontWeight: 800, fontSize: '14px', color: '#0B3C2D', fontFamily: 'Inter, sans-serif' }}>
                   100% Free Doctor Consultation Included
                 </div>
                 <div style={{ fontSize: '12px', color: '#334155', marginTop: '2px', lineHeight: 1.4 }}>
@@ -541,7 +542,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               top: '90px'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid #F1F5F9', paddingBottom: '12px' }}>
-                <h2 style={{ fontFamily: 'Outfit, sans-serif', fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
+                <h2 style={{ fontFamily: 'Inter, sans-serif', fontSize: '18px', fontWeight: 800, color: '#0F172A', margin: 0 }}>
                   Order Summary
                 </h2>
                 <span style={{ background: '#E6F7F2', color: '#0B3C2D', fontSize: '12px', fontWeight: 800, padding: '3px 10px', borderRadius: '9999px' }}>
@@ -629,7 +630,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
               {/* Step 2: Payment Method Selection */}
               <div style={{ marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', fontFamily: 'Outfit, sans-serif' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0F172A', fontFamily: 'Inter, sans-serif' }}>
                     Payment Mode:
                   </span>
                   <span style={{ fontSize: '11px', color: '#166534', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
@@ -738,7 +739,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                   border: 'none',
                   padding: '16px',
                   borderRadius: '9999px',
-                  fontFamily: 'Outfit, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '15px',
                   fontWeight: 800,
                   cursor: 'pointer',

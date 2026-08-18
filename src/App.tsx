@@ -15,7 +15,7 @@ import { HairTestView } from './HairTestView';
 import { HowItWorksAnimation } from './HowItWorksAnimation';
 import { ProfileView } from './ProfileView';
 import { WishlistView } from './WishlistView';
-import { fetchProductsFromAPI, addToCartAPI, fetchCartAPI, removeFromCartAPI, updateCartCountAPI, trackCheckoutClickAPI, fetchWishlistAPI, toggleWishlistAPI } from './api';
+import { fetchProductsFromAPI, fetchTopSellingProducts, fetchFeaturedProducts, addToCartAPI, fetchCartAPI, removeFromCartAPI, updateCartCountAPI, trackCheckoutClickAPI, fetchWishlistAPI, toggleWishlistAPI } from './api';
 
 export default function App() {
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(() => {
@@ -181,38 +181,52 @@ export default function App() {
   const [products, setProducts] = useState<Product[]>(initialProducts);
 
   useEffect(() => {
-    fetchProductsFromAPI().then(apiData => {
-      const list = Array.isArray(apiData) ? apiData : (apiData?.products || apiData?.data || []);
-      if (list.length > 0) {
-        const mapped: Product[] = list.map((item: any, idx: number) => {
-          const imgUrl = item.primary_image ? `${item.image_path || 'https://kanchara.datacubeglobal.com/storage'}/${item.primary_image}` : productImage;
-          return {
-            id: String(item.product_id || item.id || `api-${idx}`),
-            product_id: item.product_id || item.id,
-            name: item.product_name || item.name || item.title || `Formulation #${idx + 1}`,
-            desc: item.description || item.desc || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
-            price: Number(item.special_price || item.price || item.unit_price || 999),
-            originalPrice: Number(item.mrp || item.original_price || (Number(item.special_price || item.price || 999) + 400)),
-            rating: Number(item.rating || 4.9),
-            reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
-            badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
-            category: item.category || item.category_name || (idx % 4 === 0 ? 'kits' : idx % 4 === 1 ? 'serums' : idx % 4 === 2 ? 'ayurveda' : 'nutrition'),
-            benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
-            formula: item.formula || 'Ayurveda + Procapil + Nutrients',
-            iconComponent: (
-              <img 
-                src={imgUrl} 
-                alt={item.product_name || item.name} 
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = productImage;
-                }}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
-              />
-            )
-          };
-        });
-        const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
+    Promise.all([
+      fetchProductsFromAPI(),
+      fetchTopSellingProducts(),
+      fetchFeaturedProducts()
+    ]).then(([prodRes, topRes, featRes]) => {
+      const rawProducts = Array.isArray(prodRes) ? prodRes : (prodRes?.products || prodRes?.data || []);
+      const topProducts = Array.isArray(topRes) ? topRes : (topRes?.products || topRes?.data || []);
+      const featProducts = Array.isArray(featRes) ? featRes : (featRes?.products || featRes?.data || []);
+
+      const combined = [...rawProducts, ...topProducts, ...featProducts];
+      const sourceList = combined.length > 0 ? combined : initialProducts;
+
+      const mapped: Product[] = sourceList.map((item: any, idx: number) => {
+        const imgUrl = item.primary_image ? `${item.image_path || 'https://kanchara.datacubeglobal.com/storage'}/${item.primary_image}` : productImage;
+        return {
+          id: String(item.product_id || item.id || `api-${idx}`),
+          product_id: item.product_id || item.id,
+          name: item.product_name || item.name || item.title || `Formulation #${idx + 1}`,
+          desc: item.description || item.desc || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
+          price: Number(item.special_price || item.price || item.unit_price || 999),
+          originalPrice: Number(item.mrp || item.original_price || (Number(item.special_price || item.price || 999) + 400)),
+          rating: Number(item.rating || 4.9),
+          reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
+          badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
+          category: item.category || item.category_name || (idx % 4 === 0 ? 'kits' : idx % 4 === 1 ? 'serums' : idx % 4 === 2 ? 'ayurveda' : 'nutrition'),
+          benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
+          formula: item.formula || 'Ayurveda + Procapil + Nutrients',
+          iconComponent: (
+            <img 
+              src={imgUrl} 
+              alt={item.product_name || item.name} 
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = productImage;
+              }}
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+            />
+          )
+        };
+      });
+
+      const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
+      if (unique.length < 2) {
+        const mergedFallback = Array.from(new Map([...unique, ...initialProducts].map(p => [p.name, p])).values());
+        setProducts(mergedFallback);
+      } else {
         setProducts(unique);
       }
     }).catch(err => {
@@ -395,6 +409,7 @@ export default function App() {
     localStorage.setItem('kanchara_user_phone', phone);
     if (token) localStorage.setItem('kanchara_auth_token', token);
     if (user) localStorage.setItem('kanchara_user_data', JSON.stringify(user));
+    localStorage.setItem('kanchara_last_activity', Date.now().toString());
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -517,7 +532,53 @@ export default function App() {
     localStorage.removeItem('kanchara_user_phone');
     localStorage.removeItem('kanchara_auth_token');
     localStorage.removeItem('kanchara_user_data');
+    localStorage.removeItem('kanchara_last_activity');
   };
+
+  // 1 Hour Inactivity Auto Logout
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    const INACTIVITY_TIMEOUT = 60 * 60 * 1000; // 1 hour in ms
+
+    const updateActivity = () => {
+      localStorage.setItem('kanchara_last_activity', Date.now().toString());
+    };
+
+    if (!localStorage.getItem('kanchara_last_activity')) {
+      updateActivity();
+    }
+
+    let lastUpdate = 0;
+    const handleUserActivity = () => {
+      const now = Date.now();
+      if (now - lastUpdate > 5000) {
+        lastUpdate = now;
+        updateActivity();
+      }
+    };
+
+    const activityEvents = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    activityEvents.forEach(event => window.addEventListener(event, handleUserActivity, { passive: true }));
+
+    const checkInactivity = () => {
+      const lastActivityStr = localStorage.getItem('kanchara_last_activity');
+      if (lastActivityStr) {
+        const lastActivity = parseInt(lastActivityStr, 10);
+        if (Date.now() - lastActivity >= INACTIVITY_TIMEOUT) {
+          handleLogout();
+        }
+      }
+    };
+
+    checkInactivity();
+    const interval = setInterval(checkInactivity, 10000);
+
+    return () => {
+      activityEvents.forEach(event => window.removeEventListener(event, handleUserActivity));
+      clearInterval(interval);
+    };
+  }, [isLoggedIn]);
 
   const resetQuiz = () => {
     setQuizStep(0);
@@ -585,6 +646,7 @@ export default function App() {
           setCurrentView={setCurrentView}
           addToCart={addToCart}
           products={products}
+          setQuizStep={setQuizStep}
         />
       ) : currentView === 'profile' ? (
         <ProfileView
@@ -1445,12 +1507,12 @@ export default function App() {
       )}
 
       {/* Footer */}
-      {!['profile', 'wishlist'].includes(currentView) && (
+      {!['assessment', 'profile', 'wishlist'].includes(currentView) && (
         <footer className="site-footer">
           <div className="footer-inner">
             <div className="footer-brand">
               <div className="brand-logo" onClick={() => setCurrentView('home')} style={{ cursor: 'pointer' }}>
-                <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '64px', width: 'auto' }} />
+                <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '42px', width: 'auto' }} />
               </div>
               <p>Targeting hair loss root causes with customized 3-Science holistic healthcare.</p>
             </div>
@@ -1483,9 +1545,9 @@ export default function App() {
             </div>
           </div>
 
-          <div className="footer-bottom-line">
+          <div className="footer-bottom-bar">
             <span>© {new Date().getFullYear()} KANCHARA Health Technologies Inc. All rights reserved.</span>
-            <span>Designed with Clinical Excellence</span>
+            <span>Clinical Excellence & 3-Science Care</span>
           </div>
         </footer>
       )}

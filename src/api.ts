@@ -593,15 +593,29 @@ export const submitCheckoutAPI = async (payload: {
 };
 
 export const fetchPurchaseHistory = async (token: string) => {
+  if (!token) return [];
   try {
-    const res = await fetch(`${API_BASE_URL}/purchase/history`, {
+    const res = await fetch(`${API_BASE_URL}/purchase/history?token=${encodeURIComponent(token)}`, {
+      method: 'GET',
       headers: getHeaders(token)
     });
-    const data = await res.json();
-    return data.orders || data.history || data.data || data;
+    if (!res.ok) return [];
+    const text = await res.text();
+    if (!text) return [];
+    try {
+      const data = JSON.parse(text);
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data.orders)) return data.orders;
+      if (Array.isArray(data.purchase_history)) return data.purchase_history;
+      if (Array.isArray(data.history)) return data.history;
+      if (Array.isArray(data.data)) return data.data;
+      return [];
+    } catch (e) {
+      return [];
+    }
   } catch (err) {
     console.warn('fetchPurchaseHistory error:', err);
-    return null;
+    return [];
   }
 };
 
