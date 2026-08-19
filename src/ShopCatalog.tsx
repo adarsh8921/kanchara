@@ -24,6 +24,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high' | 'rating'>('featured');
   const [apiProductsList, setApiProductsList] = useState<Product[]>([]);
+  const [categoriesList, setCategoriesList] = useState<Array<{ id: string; name: string; slug?: string }>>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       fetchCategories(),
       fetchTopSellingProducts(),
       fetchFeaturedProducts()
-    ]).then(([prodRes, _catRes, topRes, featRes]) => {
+    ]).then(([prodRes, catRes, topRes, featRes]) => {
       if (!isMounted) return;
 
       const rawProducts = Array.isArray(prodRes) ? prodRes : (prodRes?.products || prodRes?.data || []);
@@ -48,6 +49,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       const mapped: Product[] = sourceList.map((item: any, idx: number) => ({
         id: String(item.product_id || item.id || `api-prod-${idx}`),
         product_id: item.product_id || item.id,
+        category_id: item.category_id || item.cat_id,
         name: item.name || item.title || item.product_name || `Formulation #${idx + 1}`,
         desc: item.desc || item.description || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
         price: Number(item.price || item.unit_price || item.selling_price || 999),
@@ -63,6 +65,33 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
 
       const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
       setApiProductsList(unique);
+
+      // Parse Categories from API
+      const rawCatList = Array.isArray(catRes) 
+        ? catRes 
+        : (catRes?.categories || catRes?.data || catRes?.category_list || []);
+
+      if (Array.isArray(rawCatList) && rawCatList.length > 0) {
+        const parsedCatList = rawCatList.map((c: any, idx: number) => ({
+          id: String(c.category_id || c.id || c.slug || `cat-${idx}`),
+          name: String(c.category_name || c.name || c.title || c.slug || `Category ${idx + 1}`),
+          slug: c.slug || c.category_slug || c.name || c.category_name
+        }));
+        setCategoriesList(parsedCatList);
+      } else {
+        // Fallback default categories if API returns null/empty
+        const fallbackExtracted = Array.from(new Set(unique.map(p => p.category).filter(Boolean))).map((cName, idx) => ({
+          id: `cat-ext-${idx}`,
+          name: String(cName)
+        }));
+        setCategoriesList(fallbackExtracted.length > 0 ? fallbackExtracted : [
+          { id: 'kits', name: 'Complete Kits' },
+          { id: 'serums', name: 'Derm Serums' },
+          { id: 'ayurveda', name: 'Ayurvedic Oils' },
+          { id: 'nutrition', name: 'Supplements' }
+        ]);
+      }
+
       setIsLoading(false);
     }).catch(err => {
       console.warn('API fetch error in ShopCatalog:', err);
@@ -77,7 +106,26 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
 
   let filteredProducts = productCategory === 'all' 
     ? apiProductsList 
-    : apiProductsList.filter(p => p.category === productCategory || p.category?.toLowerCase() === productCategory.toLowerCase());
+    : apiProductsList.filter(p => {
+        const target = productCategory.toLowerCase();
+        const pCat = (p.category || '').toLowerCase();
+        const pCatId = String((p as any).category_id || '').toLowerCase();
+
+        const matchedCatObj = categoriesList.find(c => 
+          c.id.toLowerCase() === target || 
+          c.name.toLowerCase() === target || 
+          (c.slug && c.slug.toLowerCase() === target)
+        );
+
+        if (matchedCatObj) {
+          return pCat === matchedCatObj.name.toLowerCase() || 
+                 pCat === matchedCatObj.id.toLowerCase() || 
+                 (matchedCatObj.slug && pCat === matchedCatObj.slug.toLowerCase()) ||
+                 pCatId === matchedCatObj.id.toLowerCase();
+        }
+
+        return pCat === target || pCat.includes(target);
+      });
 
   if (searchQuery.trim()) {
     filteredProducts = filteredProducts.filter(p => 
@@ -143,42 +191,79 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
           justifyContent: 'space-between',
           marginBottom: '20px'
         }}>
-          {/* Category Tabs */}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-            {[
-              { id: 'all', label: 'All Products', count: apiProductsList.length },
-              { id: 'kits', label: 'Complete Kits', count: apiProductsList.filter(p => p.category === 'kits').length || 2 },
-              { id: 'serums', label: 'Derm Serums', count: apiProductsList.filter(p => p.category === 'serums').length || 1 },
-              { id: 'ayurveda', label: 'Ayurvedic Oils', count: apiProductsList.filter(p => p.category === 'ayurveda').length || 1 },
-              { id: 'nutrition', label: 'Supplements', count: apiProductsList.filter(p => p.category === 'nutrition').length || 1 }
-            ].map(f => (
-              <button 
-                key={f.id} 
-                onClick={() => setProductCategory(f.id)}
-                style={{
-                  background: productCategory === f.id ? '#0B3C2D' : '#F1F5F9',
-                  color: productCategory === f.id ? '#ffffff' : '#475569',
-                  border: 'none',
-                  padding: '6px 14px',
-                  borderRadius: '9999px',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}
-              >
-                <span>{f.label}</span>
-                <span style={{
-                  background: productCategory === f.id ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.06)',
-                  padding: '1px 6px',
-                  borderRadius: '8px',
-                  fontSize: '10px'
-                }}>{f.count}</span>
-              </button>
-            ))}
+          {/* Dynamic Category Tabs from API */}
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button 
+              onClick={() => setProductCategory('all')}
+              style={{
+                background: productCategory === 'all' ? '#0B3C2D' : '#F1F5F9',
+                color: productCategory === 'all' ? '#ffffff' : '#475569',
+                border: 'none',
+                padding: '6px 14px',
+                borderRadius: '9999px',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>All Products</span>
+              <span style={{
+                background: productCategory === 'all' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.06)',
+                padding: '1px 6px',
+                borderRadius: '8px',
+                fontSize: '10px'
+              }}>{apiProductsList.length}</span>
+            </button>
+
+            {categoriesList.map(cat => {
+              const isSelected = productCategory === cat.id || 
+                                 productCategory.toLowerCase() === cat.name.toLowerCase() ||
+                                 (cat.slug && productCategory.toLowerCase() === cat.slug.toLowerCase());
+
+              const count = apiProductsList.filter(p => {
+                const pCat = (p.category || '').toLowerCase();
+                const pCatId = String((p as any).category_id || '').toLowerCase();
+                return pCat === cat.name.toLowerCase() || 
+                       pCat === cat.id.toLowerCase() || 
+                       (cat.slug && pCat === cat.slug.toLowerCase()) ||
+                       pCatId === cat.id.toLowerCase();
+              }).length;
+
+              return (
+                <button 
+                  key={cat.id} 
+                  onClick={() => setProductCategory(cat.name)}
+                  style={{
+                    background: isSelected ? '#0B3C2D' : '#F1F5F9',
+                    color: isSelected ? '#ffffff' : '#475569',
+                    border: 'none',
+                    padding: '6px 14px',
+                    borderRadius: '9999px',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>{cat.name}</span>
+                  {count > 0 && (
+                    <span style={{
+                      background: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.06)',
+                      padding: '1px 6px',
+                      borderRadius: '8px',
+                      fontSize: '10px'
+                    }}>{count}</span>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           {/* Search & Sort */}

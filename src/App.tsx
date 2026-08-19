@@ -975,7 +975,8 @@ export default function App() {
 
               <h2 className="timeline-title">When will you see results?</h2>
 
-              <div className="timeline-track-wrapper">
+              {/* Desktop View: Original Horizontal Timeline Grid */}
+              <div className="timeline-track-wrapper timeline-desktop-track">
                 <div className="timeline-connecting-line"></div>
 
                 {activeTab === 'men' ? (
@@ -1076,6 +1077,43 @@ export default function App() {
                 )}
               </div>
 
+              {/* Mobile View: Vertical Stepper Roadmap */}
+              <div className="vertical-stepper-container timeline-mobile-stepper">
+                <div className="vertical-stepper-line"></div>
+
+                {(activeTab === 'men' ? [
+                  { month: 'Month 1', title: 'Control Dandruff', desc: 'Deep scalp cleansing & sebum unclogging', icon: <Icons.FollicleStage1 /> },
+                  { month: 'Month 2', title: 'Improve Follicular Health', desc: 'Boost micro-circulation around dormant roots', icon: <Icons.FollicleStage2 /> },
+                  { month: 'Month 3', title: 'Hair Fall Control', desc: '89% breakage reduction & root anchoring', icon: <Icons.FollicleStage3 /> },
+                  { month: 'Month 4', title: 'Hair Growth', desc: 'Dormant roots transition to active growth', icon: <Icons.FollicleStage4 /> },
+                  { month: 'Month 5', title: 'Hair Growth', desc: 'Noticeable density increase & baby hair fill-in', icon: <Icons.FollicleStage5 /> },
+                  { month: 'Month 6', title: 'Maintaining Awesome Hair', desc: 'Sustained density, shine & scalp defense', icon: <Icons.FollicleStage6 /> }
+                ] : [
+                  { month: 'Month 1', title: 'Visible Dandruff Reduction', desc: 'Clear scalp buildup & detoxify roots', icon: <Icons.FollicleStage1 /> },
+                  { month: 'Month 2', title: 'Scalp Health Improves', desc: 'Enhanced moisture & follicle nourishment', icon: <Icons.FollicleStage2 /> },
+                  { month: 'Month 3', title: 'Weak Detached Hair Falls', desc: 'Natural shedding of weak damaged strands', icon: <Icons.FollicleStage3 /> },
+                  { month: 'Month 4', title: 'Hair Fall Under Control', desc: 'Strengthened root retention & less fall', icon: <Icons.FollicleStage4 /> },
+                  { month: 'Month 5', title: 'Faster Hair Growth', desc: 'Reactivated follicles produce new strands', icon: <Icons.FollicleStage5 /> },
+                  { month: 'Month 6', title: 'Thick Dense Hair', desc: 'Fuller scalp volume & improved shaft thickness', icon: <Icons.FollicleStage6 /> },
+                  { month: 'Month 7', title: 'Healthy Hair', desc: 'Strong from root to tip with lifelong vitality', icon: <Icons.FollicleStage7 /> }
+                ]).map((step, idx) => (
+                  <div key={idx} className="stepper-row">
+                    <div className="stepper-node-wrapper">
+                      <div className="stepper-badge-icon">{step.icon}</div>
+                    </div>
+
+                    <div className="stepper-card">
+                      <div className="stepper-card-header">
+                        <span className="stepper-month-pill">{step.month}</span>
+                        <span className="stepper-step-num">STAGE 0{idx + 1}</span>
+                      </div>
+                      <h4 className="stepper-card-title">{step.title}</h4>
+                      <p className="stepper-card-desc">{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               <p className="timeline-disclaimer">*Timeline varies for both male and females based on their unique root causes.</p>
             </div>
           </section>
@@ -1152,7 +1190,7 @@ export default function App() {
                   Targeting the 3 root causes (Ayurveda Pitta Dosha + Scalp DHT Blocking + Hair Nutrients) turns dormant, inactive hair roots into thick, healthy hair shafts.
                 </p>
 
-                <div style={{ display: 'flex', gap: '20px', marginBottom: '28px' }}>
+                <div className="banner-stats-row">
                   <div className="banner-stat-box">
                     <strong>+48%</strong>
                     <span>Increased Hair Density</span>
@@ -1163,7 +1201,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <button className="btn-cta-main" style={{ display: 'inline-flex', width: 'auto' }} onClick={() => setShowHairTest(true)}>
+                <button className="btn-cta-main banner-cta-btn" onClick={() => setShowHairTest(true)}>
                   <span>GET YOUR CUSTOM REGROWTH PLAN</span>
                   <span className="arrow">➔</span>
                 </button>
