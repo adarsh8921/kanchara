@@ -185,13 +185,9 @@ export default function App() {
       fetchProductsFromAPI(),
       fetchTopSellingProducts(),
       fetchFeaturedProducts()
-    ]).then(([prodRes, topRes, featRes]) => {
+    ]).then(([prodRes]) => {
       const rawProducts = Array.isArray(prodRes) ? prodRes : (prodRes?.products || prodRes?.data || []);
-      const topProducts = Array.isArray(topRes) ? topRes : (topRes?.products || topRes?.data || []);
-      const featProducts = Array.isArray(featRes) ? featRes : (featRes?.products || featRes?.data || []);
-
-      const combined = [...rawProducts, ...topProducts, ...featProducts];
-      const sourceList = combined.length > 0 ? combined : initialProducts;
+      const sourceList = rawProducts.length > 0 ? rawProducts : initialProducts;
 
       const mapped: Product[] = sourceList.map((item: any, idx: number) => {
         const imgUrl = item.primary_image ? `${item.image_path || 'https://kanchara.datacubeglobal.com/storage'}/${item.primary_image}` : productImage;
@@ -223,12 +219,7 @@ export default function App() {
       });
 
       const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
-      if (unique.length < 2) {
-        const mergedFallback = Array.from(new Map([...unique, ...initialProducts].map(p => [p.name, p])).values());
-        setProducts(mergedFallback);
-      } else {
-        setProducts(unique);
-      }
+      setProducts(unique);
     }).catch(err => {
       console.warn('Failed to load products from API on mount:', err);
     });

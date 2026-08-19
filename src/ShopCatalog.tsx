@@ -36,15 +36,11 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       fetchCategories(),
       fetchTopSellingProducts(),
       fetchFeaturedProducts()
-    ]).then(([prodRes, catRes, topRes, featRes]) => {
+    ]).then(([prodRes, catRes]) => {
       if (!isMounted) return;
 
       const rawProducts = Array.isArray(prodRes) ? prodRes : (prodRes?.products || prodRes?.data || []);
-      const topProducts = Array.isArray(topRes) ? topRes : (topRes?.products || topRes?.data || []);
-      const featProducts = Array.isArray(featRes) ? featRes : (featRes?.products || featRes?.data || []);
-
-      const combined = [...rawProducts, ...topProducts, ...featProducts];
-      const sourceList = combined.length > 0 ? combined : initialProducts;
+      const sourceList = rawProducts.length > 0 ? rawProducts : initialProducts;
 
       const mapped: Product[] = sourceList.map((item: any, idx: number) => ({
         id: String(item.product_id || item.id || `api-prod-${idx}`),
