@@ -22,13 +22,21 @@ export const WishlistView: React.FC<WishlistViewProps> = ({ onAddToCart, setCurr
         if (Array.isArray(raw)) {
           const mapped: Product[] = raw.map((item: any, idx: number) => {
             const imgUrl = item.primary_image ? `${item.image_path || 'https://kanchara.datacubeglobal.com/storage'}/${item.primary_image}` : productImage;
+            const p1 = Number(item.special_price ?? item.unit_price ?? item.selling_price ?? item.offer_price ?? item.price ?? 999);
+            const p2 = Number(item.mrp ?? item.original_price ?? item.price ?? (p1 + 300));
+            const sellingPrice = Math.min(p1, p2);
+            let originalMRP = Math.max(p1, p2);
+            if (originalMRP <= sellingPrice) {
+              originalMRP = Math.round(sellingPrice * 1.35);
+            }
+
             return {
               id: String(item.product_id || item.id || `wish-${idx}`),
               product_id: item.product_id || item.id,
               name: item.name || item.product_name || item.title || `Prescribed Kit #${idx + 1}`,
               category: item.category || 'kits',
-              price: Number(item.price || item.unit_price || 999),
-              originalPrice: Number(item.original_price || item.mrp || (Number(item.price || 999) + 400)),
+              price: sellingPrice,
+              originalPrice: originalMRP,
               rating: Number(item.rating || 4.9),
               reviewsCount: Number(item.reviews_count || 140),
               badge: item.badge || 'PRESCRIPTION SAVED',

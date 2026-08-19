@@ -42,22 +42,32 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       const rawProducts = Array.isArray(prodRes) ? prodRes : (prodRes?.products || prodRes?.data || []);
       const sourceList = rawProducts.length > 0 ? rawProducts : initialProducts;
 
-      const mapped: Product[] = sourceList.map((item: any, idx: number) => ({
-        id: String(item.product_id || item.id || `api-prod-${idx}`),
-        product_id: item.product_id || item.id,
-        category_id: item.category_id || item.cat_id,
-        name: item.name || item.title || item.product_name || `Formulation #${idx + 1}`,
-        desc: item.desc || item.description || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
-        price: Number(item.price || item.unit_price || item.selling_price || 999),
-        originalPrice: Number(item.original_price || item.mrp || (Number(item.price || 999) + 400)),
-        rating: Number(item.rating || 4.9),
-        reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
-        badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
-        category: item.category || item.category_name || (idx % 4 === 0 ? 'kits' : idx % 4 === 1 ? 'serums' : idx % 4 === 2 ? 'ayurveda' : 'nutrition'),
-        benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
-        formula: item.formula || 'Ayurveda + Procapil + Nutrients',
-        iconBg: '#F0FDF4'
-      }));
+      const mapped: Product[] = sourceList.map((item: any, idx: number) => {
+        const p1 = Number(item.special_price ?? item.unit_price ?? item.selling_price ?? item.offer_price ?? item.price ?? 999);
+        const p2 = Number(item.mrp ?? item.original_price ?? item.price ?? (p1 + 300));
+        const sellingPrice = Math.min(p1, p2);
+        let originalMRP = Math.max(p1, p2);
+        if (originalMRP <= sellingPrice) {
+          originalMRP = Math.round(sellingPrice * 1.35);
+        }
+
+        return {
+          id: String(item.product_id || item.id || `api-prod-${idx}`),
+          product_id: item.product_id || item.id,
+          category_id: item.category_id || item.cat_id,
+          name: item.name || item.title || item.product_name || `Formulation #${idx + 1}`,
+          desc: item.desc || item.description || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
+          price: sellingPrice,
+          originalPrice: originalMRP,
+          rating: Number(item.rating || 4.9),
+          reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
+          badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
+          category: item.category || item.category_name || (idx % 4 === 0 ? 'kits' : idx % 4 === 1 ? 'serums' : idx % 4 === 2 ? 'ayurveda' : 'nutrition'),
+          benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
+          formula: item.formula || 'Ayurveda + Procapil + Nutrients',
+          iconBg: '#F0FDF4'
+        };
+      });
 
       const unique = Array.from(new Map(mapped.map(p => [p.name, p])).values());
       setApiProductsList(unique);

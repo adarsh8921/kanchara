@@ -191,13 +191,21 @@ export default function App() {
 
       const mapped: Product[] = sourceList.map((item: any, idx: number) => {
         const imgUrl = item.primary_image ? `${item.image_path || 'https://kanchara.datacubeglobal.com/storage'}/${item.primary_image}` : productImage;
+        const p1 = Number(item.special_price ?? item.unit_price ?? item.selling_price ?? item.offer_price ?? item.price ?? 999);
+        const p2 = Number(item.mrp ?? item.original_price ?? item.price ?? (p1 + 300));
+        const sellingPrice = Math.min(p1, p2);
+        let originalMRP = Math.max(p1, p2);
+        if (originalMRP <= sellingPrice) {
+          originalMRP = Math.round(sellingPrice * 1.35);
+        }
+
         return {
           id: String(item.product_id || item.id || `api-${idx}`),
           product_id: item.product_id || item.id,
           name: item.product_name || item.name || item.title || `Formulation #${idx + 1}`,
           desc: item.description || item.desc || item.subtitle || 'Doctor formulated 3-Science Regrowth Solution',
-          price: Number(item.special_price || item.price || item.unit_price || 999),
-          originalPrice: Number(item.mrp || item.original_price || (Number(item.special_price || item.price || 999) + 400)),
+          price: sellingPrice,
+          originalPrice: originalMRP,
           rating: Number(item.rating || 4.9),
           reviewsCount: Number(item.reviews_count || item.total_reviews || 128 + idx * 12),
           badge: item.badge || item.tag || (idx % 2 === 0 ? 'CLINICALLY PROVEN' : 'DOCTOR FORMULATED'),
