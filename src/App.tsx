@@ -23,7 +23,7 @@ export default function App() {
     if (saved) {
       try {
         return new Set(JSON.parse(saved));
-      } catch (e) {}
+      } catch (e) { }
     }
     return new Set();
   });
@@ -51,7 +51,7 @@ export default function App() {
     localStorage.setItem('kanchara_current_view', view);
     try {
       window.history.replaceState(null, '', `#${view}`);
-    } catch (e) {}
+    } catch (e) { }
   };
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-  
+
   // E-Commerce State
   const [productCategory, setProductCategory] = useState<string>('all');
   const [cartItems, setCartItems] = useState<Product[]>([]);
@@ -209,14 +209,14 @@ export default function App() {
           benefits: item.benefits || ['Root Revitalization', 'Scalp Circulation', 'Zero Toxins'],
           formula: item.formula || 'Ayurveda + Procapil + Nutrients',
           iconComponent: (
-            <img 
-              src={imgUrl} 
-              alt={item.product_name || item.name} 
+            <img
+              src={imgUrl}
+              alt={item.product_name || item.name}
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = productImage;
               }}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             />
           )
         };
@@ -239,7 +239,7 @@ export default function App() {
       return item.product_id;
     }
     const itemName = (item.product_name || item.name || item.title || '').trim().toLowerCase();
-    const matched = products.find(p => 
+    const matched = products.find(p =>
       (p.name && p.name.trim().toLowerCase() === itemName) ||
       (p.product_id && String(p.product_id) === String(item.product_id)) ||
       (p.id && String(p.id) === String(item.id))
@@ -431,7 +431,7 @@ export default function App() {
           body: JSON.stringify({ mobile: cleanPhone })
         });
         const data = await res.json();
-        
+
         if (data.status === 'success' || data.response_code === 200 || res.ok) {
           if (typeof data.is_registered !== 'undefined') {
             setIsRegistered(Boolean(data.is_registered));
@@ -458,8 +458,8 @@ export default function App() {
 
       setIsLoading(true);
       try {
-        const targetUrl = isRegistered 
-          ? 'https://kanchara.datacubeglobal.com/api/auth/login-with-otp' 
+        const targetUrl = isRegistered
+          ? 'https://kanchara.datacubeglobal.com/api/auth/login-with-otp'
           : 'https://kanchara.datacubeglobal.com/api/auth/verify-otp';
 
         let res = await fetch(targetUrl, {
@@ -598,7 +598,7 @@ export default function App() {
           </div>
         )}
 
-        <Header 
+        <Header
           scrolled={scrolled}
           currentView={currentView}
           setCurrentView={setCurrentView}
@@ -611,7 +611,7 @@ export default function App() {
 
       {/* Modular View Routing */}
       {currentView === 'checkout' ? (
-        <CheckoutView 
+        <CheckoutView
           cartItems={cartItems}
           cartTotal={cartTotal}
           paymentMethod={paymentMethod}
@@ -666,7 +666,7 @@ export default function App() {
       ) : currentView === 'wishlist' ? (
         <WishlistView onAddToCart={addToCart} setCurrentView={setCurrentView} onRemoveFromWishlist={handleToggleWishlist} onSyncWishlist={handleSyncWishlist} />
       ) : currentView === 'shop' ? (
-        <ShopCatalog 
+        <ShopCatalog
           products={products}
           productCategory={productCategory}
           setProductCategory={setProductCategory}
@@ -697,13 +697,13 @@ export default function App() {
                 </p>
 
                 <div className="segment-control-botanical">
-                  <button 
+                  <button
                     className={`segment-btn-botanical ${activeTab === 'men' ? 'active' : ''}`}
                     onClick={() => setActiveTab('men')}
                   >
                     <Icons.Ayurveda /> Male Hair Loss
                   </button>
-                  <button 
+                  <button
                     className={`segment-btn-botanical ${activeTab === 'women' ? 'active' : ''}`}
                     onClick={() => setActiveTab('women')}
                   >
@@ -826,8 +826,8 @@ export default function App() {
             </div>
 
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
-              <button 
-                className="btn-cta-main" 
+              <button
+                className="btn-cta-main"
                 style={{ display: 'inline-flex', width: 'auto', padding: '10px 24px', fontSize: '12px' }}
                 onClick={() => setCurrentView('shop')}
               >
@@ -889,8 +889,8 @@ export default function App() {
                 <h2 className="section-heading" style={{ margin: 0 }}>Hair health starts from within</h2>
               </div>
               <div className="carousel-nav-btns">
-                <button 
-                  className="nav-arrow-btn" 
+                <button
+                  className="nav-arrow-btn"
                   title="Previous"
                   onClick={() => {
                     const row = document.querySelector('.root-causes-cards-row');
@@ -899,8 +899,8 @@ export default function App() {
                 >
                   ‹
                 </button>
-                <button 
-                  className="nav-arrow-btn" 
+                <button
+                  className="nav-arrow-btn"
                   title="Next"
                   onClick={() => {
                     const row = document.querySelector('.root-causes-cards-row');
@@ -959,13 +959,13 @@ export default function App() {
           <section className="section-results-timeline">
             <div className="timeline-card-box">
               <div className="timeline-gender-switcher">
-                <button 
+                <button
                   className={`timeline-gender-btn ${activeTab === 'men' ? 'active' : ''}`}
                   onClick={() => setActiveTab('men')}
                 >
                   MALE
                 </button>
-                <button 
+                <button
                   className={`timeline-gender-btn ${activeTab === 'women' ? 'active' : ''}`}
                   onClick={() => setActiveTab('women')}
                 >
@@ -1129,8 +1129,8 @@ export default function App() {
 
               <div className="stage-buttons-bar">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <button 
-                    key={s} 
+                  <button
+                    key={s}
                     className={`stage-select-btn ${stage === s ? 'active' : ''}`}
                     onClick={() => setStage(s)}
                   >
@@ -1157,9 +1157,9 @@ export default function App() {
                 </div>
 
                 <div className="stage-visual-canvas">
-                  <div 
-                    className="follicle-graphic" 
-                    style={{ 
+                  <div
+                    className="follicle-graphic"
+                    style={{
                       transform: `scale(${1 - (stage - 1) * 0.12})`,
                       opacity: 1 - (stage - 1) * 0.15
                     }}
@@ -1258,8 +1258,8 @@ export default function App() {
                   a: "No. Our Ayurvedic formulas and plant nutrition supplements are 100% natural and toxin-free. Any dermatological topical ingredients are customized under strict doctor guidance to ensure complete safety."
                 }
               ].map((item, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className={`faq-node ${activeFaq === idx ? 'expanded' : ''}`}
                   onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
                 >
@@ -1299,8 +1299,8 @@ export default function App() {
                 <span>Add <strong>₹{999 - cartTotal}</strong> more to unlock FREE Express Delivery!</span>
               )}
               <div className="shipping-progress-track">
-                <div 
-                  className="shipping-progress-fill" 
+                <div
+                  className="shipping-progress-fill"
                   style={{ width: `${Math.min(100, (cartTotal / 999) * 100)}%` }}
                 ></div>
               </div>
@@ -1320,11 +1320,11 @@ export default function App() {
                     <div className="cart-item-img-box">
                       {item.iconComponent || <img src={productImage} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />}
                     </div>
-                    
+
                     <div className="cart-item-info">
                       <h4>{item.name}</h4>
                       <div className="cart-item-meta">✓ Doctor Formulated</div>
-                      
+
                       <div className="cart-qty-control">
                         <button className="qty-btn" onClick={() => updateCartQuantity(item, 0)}>-</button>
                         <span className="qty-val">1</span>
@@ -1370,8 +1370,8 @@ export default function App() {
                     </div>
                   </div>
 
-                  <button 
-                    className="btn-cta-main" 
+                  <button
+                    className="btn-cta-main"
                     onClick={() => {
                       const token = userToken || localStorage.getItem('kanchara_auth_token') || undefined;
                       const sessionId = localStorage.getItem('kanchara_session_id') || `sess_${Date.now()}`;
@@ -1408,8 +1408,8 @@ export default function App() {
             {quizStep < quizQuestions.length ? (
               <div>
                 <div className="progress-track">
-                  <div 
-                    className="progress-fill" 
+                  <div
+                    className="progress-fill"
                     style={{ width: `${((quizStep + 1) / quizQuestions.length) * 100}%` }}
                   ></div>
                 </div>
@@ -1421,8 +1421,8 @@ export default function App() {
 
                 <div className="option-list-vertical">
                   {quizQuestions[quizStep].options.map((optObj, i) => (
-                    <button 
-                      key={i} 
+                    <button
+                      key={i}
                       className="quiz-option-card"
                       onClick={() => handleQuizSelect(optObj.text)}
                     >
@@ -1467,7 +1467,7 @@ export default function App() {
         <div className="modal-backdrop-auth" onClick={() => setShowAuthModal(false)}>
           <div className="modal-auth-card" onClick={e => e.stopPropagation()}>
             <button className="btn-modal-close-auth" onClick={() => setShowAuthModal(false)}>✕</button>
-            
+
             <div className="auth-card-banner">
               <div className="auth-brand-badge">
                 <img src={brandLogoImg} alt="KANCHARA Logo" style={{ height: '52px', width: 'auto' }} />
@@ -1490,10 +1490,10 @@ export default function App() {
                       <label className="auth-label">Mobile Number</label>
                       <div className="auth-input-group">
                         <span className="country-code">+91</span>
-                        <input 
-                          type="tel" 
-                          className="auth-input" 
-                          placeholder="Enter 10-digit mobile number" 
+                        <input
+                          type="tel"
+                          className="auth-input"
+                          placeholder="Enter 10-digit mobile number"
                           value={authInput}
                           maxLength={10}
                           onChange={e => setAuthInput(e.target.value.replace(/\D/g, ''))}
@@ -1508,10 +1508,10 @@ export default function App() {
                         <label className="auth-label">Enter Verification Code</label>
                         <span className="auth-sent-to">Sent to <strong>+91 {authInput}</strong></span>
                       </div>
-                      <input 
-                        type="text" 
-                        className="auth-input otp-code-input" 
-                        placeholder="• • • •" 
+                      <input
+                        type="text"
+                        className="auth-input otp-code-input"
+                        placeholder="• • • •"
                         value={authOtp}
                         maxLength={4}
                         onChange={e => setAuthOtp(e.target.value)}
@@ -1595,8 +1595,8 @@ export default function App() {
             <div>
               <h4 className="footer-col-title">Patient Support</h4>
               <ul className="footer-links">
-                <li><a href="mailto:support@kanchara.health">✉️ support@kanchara.health</a></li>
-                <li><span>🕒 Mon - Sat: 9:00 AM - 7:00 PM</span></li>
+                <li><a href="mailto:support@kanchara.health"> support@kanchara.health</a></li>
+                <li><span> Mon - Sat: 9:00 AM - 7:00 PM</span></li>
                 <li><a href="#" onClick={(e) => { e.preventDefault(); setCurrentView('profile'); }}>Orders & Tracking</a></li>
                 <li><a href="#">Privacy Policy & Terms</a></li>
               </ul>

@@ -67,8 +67,8 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       setApiProductsList(unique);
 
       // Parse Categories from API
-      const rawCatList = Array.isArray(catRes) 
-        ? catRes 
+      const rawCatList = Array.isArray(catRes)
+        ? catRes
         : (catRes?.categories || catRes?.data || catRes?.category_list || []);
 
       if (Array.isArray(rawCatList) && rawCatList.length > 0) {
@@ -104,32 +104,32 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
     return () => { isMounted = false; };
   }, [productCategory, searchQuery]);
 
-  let filteredProducts = productCategory === 'all' 
-    ? apiProductsList 
+  let filteredProducts = productCategory === 'all'
+    ? apiProductsList
     : apiProductsList.filter(p => {
-        const target = productCategory.toLowerCase();
-        const pCat = (p.category || '').toLowerCase();
-        const pCatId = String((p as any).category_id || '').toLowerCase();
+      const target = productCategory.toLowerCase();
+      const pCat = (p.category || '').toLowerCase();
+      const pCatId = String((p as any).category_id || '').toLowerCase();
 
-        const matchedCatObj = categoriesList.find(c => 
-          c.id.toLowerCase() === target || 
-          c.name.toLowerCase() === target || 
-          (c.slug && c.slug.toLowerCase() === target)
-        );
+      const matchedCatObj = categoriesList.find(c =>
+        c.id.toLowerCase() === target ||
+        c.name.toLowerCase() === target ||
+        (c.slug && c.slug.toLowerCase() === target)
+      );
 
-        if (matchedCatObj) {
-          return pCat === matchedCatObj.name.toLowerCase() || 
-                 pCat === matchedCatObj.id.toLowerCase() || 
-                 (matchedCatObj.slug && pCat === matchedCatObj.slug.toLowerCase()) ||
-                 pCatId === matchedCatObj.id.toLowerCase();
-        }
+      if (matchedCatObj) {
+        return pCat === matchedCatObj.name.toLowerCase() ||
+          pCat === matchedCatObj.id.toLowerCase() ||
+          (matchedCatObj.slug && pCat === matchedCatObj.slug.toLowerCase()) ||
+          pCatId === matchedCatObj.id.toLowerCase();
+      }
 
-        return pCat === target || pCat.includes(target);
-      });
+      return pCat === target || pCat.includes(target);
+    });
 
   if (searchQuery.trim()) {
-    filteredProducts = filteredProducts.filter(p => 
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    filteredProducts = filteredProducts.filter(p =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.desc.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
@@ -155,7 +155,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
       }}>
         <div style={{ maxWidth: '1140px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 2 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255, 255, 255, 0.12)', padding: '4px 14px', borderRadius: '9999px', border: '1px solid rgba(255, 255, 255, 0.2)', marginBottom: '10px' }}>
-            <span style={{ color: '#FBBF24', fontSize: '11px' }}>✦</span>
+            <span style={{ color: '#FBBF24', fontSize: '11px' }}></span>
             <span style={{ fontSize: '10px', fontWeight: 800, letterSpacing: '0.8px', textTransform: 'uppercase', color: '#FEF3C7' }}>KANCHARA LIVE API CATALOG</span>
           </div>
 
@@ -193,7 +193,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
         }}>
           {/* Dynamic Category Tabs from API */}
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <button 
+            <button
               onClick={() => setProductCategory('all')}
               style={{
                 background: productCategory === 'all' ? '#0B3C2D' : '#F1F5F9',
@@ -220,22 +220,22 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
             </button>
 
             {categoriesList.map(cat => {
-              const isSelected = productCategory === cat.id || 
-                                 productCategory.toLowerCase() === cat.name.toLowerCase() ||
-                                 (cat.slug && productCategory.toLowerCase() === cat.slug.toLowerCase());
+              const isSelected = productCategory === cat.id ||
+                productCategory.toLowerCase() === cat.name.toLowerCase() ||
+                (cat.slug && productCategory.toLowerCase() === cat.slug.toLowerCase());
 
               const count = apiProductsList.filter(p => {
                 const pCat = (p.category || '').toLowerCase();
                 const pCatId = String((p as any).category_id || '').toLowerCase();
-                return pCat === cat.name.toLowerCase() || 
-                       pCat === cat.id.toLowerCase() || 
-                       (cat.slug && pCat === cat.slug.toLowerCase()) ||
-                       pCatId === cat.id.toLowerCase();
+                return pCat === cat.name.toLowerCase() ||
+                  pCat === cat.id.toLowerCase() ||
+                  (cat.slug && pCat === cat.slug.toLowerCase()) ||
+                  pCatId === cat.id.toLowerCase();
               }).length;
 
               return (
-                <button 
-                  key={cat.id} 
+                <button
+                  key={cat.id}
                   onClick={() => setProductCategory(cat.name)}
                   style={{
                     background: isSelected ? '#0B3C2D' : '#F1F5F9',
@@ -268,8 +268,8 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
 
           {/* Search & Sort */}
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search formulation..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
@@ -284,7 +284,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
               }}
             />
 
-            <select 
+            <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as any)}
               style={{
@@ -318,7 +318,7 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔍</div>
             <h3 style={{ fontSize: '20px', color: '#0F172A', margin: '0 0 8px' }}>No Formulations Found</h3>
             <p style={{ color: '#64748B', fontSize: '14px' }}>Try resetting your search query or switching product categories.</p>
-            <button 
+            <button
               onClick={() => { setProductCategory('all'); setSearchQuery(''); }}
               style={{ marginTop: '16px', padding: '10px 20px', background: '#0B3C2D', color: '#fff', border: 'none', borderRadius: '9999px', fontWeight: 700, cursor: 'pointer' }}
             >
@@ -328,14 +328,14 @@ export const ShopCatalog: React.FC<ShopCatalogProps> = ({
         ) : (
           <div className="products-grid">
             {filteredProducts.map(p => {
-              const isWish = wishlistIds 
+              const isWish = wishlistIds
                 ? (wishlistIds.has(String(p.id)) || wishlistIds.has(String(p.product_id)) || wishlistIds.has(p.name))
                 : false;
               return (
-                <ProductCard 
-                  key={p.id} 
-                  product={p} 
-                  onAddToCart={() => addToCart(p)} 
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  onAddToCart={() => addToCart(p)}
                   isWishlisted={isWish}
                   onToggleWishlist={onToggleWishlist}
                 />
